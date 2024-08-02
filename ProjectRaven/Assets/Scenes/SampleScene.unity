@@ -647,7 +647,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSource: {fileID: 378674050}
   BPM: 60
-  MaxClickTimerOffset: 0.4
+  MaxClickTimerOffset: 0.2
   startDelay: 0
   OnBeat: 0
 --- !u!1 &410087039

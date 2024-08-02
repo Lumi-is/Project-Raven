@@ -30,11 +30,14 @@ public class BeatManager : MonoBehaviour
         {
             yield return new WaitForSeconds(startDelay);
         }
-        yield return new WaitForSeconds(60/LocalBPM-MaxClickTimerOffset);
+        
+        yield return new WaitForSeconds(MaxClickTimerOffset);
+        OnBeat = false;
+
+        yield return new WaitForSeconds(60/LocalBPM-MaxClickTimerOffset *2);
         OnBeat = true;
 
         yield return new WaitForSeconds(MaxClickTimerOffset);
-        OnBeat = false;
 
         StartCoroutine(CheckForBeat(BPM,0));
     }
