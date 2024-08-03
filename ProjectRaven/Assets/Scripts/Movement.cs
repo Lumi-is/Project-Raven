@@ -1,6 +1,4 @@
 using System.Collections;
-using System.Data;
-using Mono.Cecil.Cil;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -32,6 +30,8 @@ public class Movement : MonoBehaviour
 
     [Header("Rhythm")]
     [SerializeField] BeatManager beatManager;
+
+    [SerializeField] AudioSource DashSFX;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
@@ -72,11 +72,12 @@ public class Movement : MonoBehaviour
     {
         if(context.started)
         {
-            if(beatManager.OnBeat && !isDashOnCoolDown)
+            if(beatManager.OnBeat && !isDashOnCoolDown && !beatManager.hasDoneActionOnCurrentBeat)
             {
+                beatManager.hasDoneActionOnCurrentBeat = true;
                 isDashOnCoolDown = true;
                 StartCoroutine(Dashing());
-                //Correct sound
+                DashSFX.Play();
             } else {
                 //Incorrect sound
             }
