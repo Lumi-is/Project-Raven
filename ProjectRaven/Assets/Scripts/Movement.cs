@@ -1,4 +1,6 @@
 using System.Collections;
+using UnityEditor.EditorTools;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -31,7 +33,13 @@ public class Movement : MonoBehaviour
     [Header("Rhythm")]
     [SerializeField] BeatManager beatManager;
 
-    [SerializeField] AudioSource DashSFX;
+    [Header("Turning")]
+    [SerializeField] Offensive attackScript;
+    public Transform orientation;
+
+    [Range(0,1000)]
+    [Tooltip("The speed at which player rotates towards a given point.")]
+    [SerializeField] float rotationSpeed;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
@@ -54,6 +62,7 @@ public class Movement : MonoBehaviour
         playerInputs = new InputSystem_Actions();
     }
 
+    private Vector3 lastWatchDirection;
     // Update is called once per frame
     void Update()
     {
@@ -65,19 +74,33 @@ public class Movement : MonoBehaviour
         if(!isDashing)
         {
             rb.linearVelocity = new Vector3(speed * Time.deltaTime * ProcessedDirection.x, rb.linearVelocity.y, speed * Time.deltaTime * ProcessedDirection.z);
+
+            if(!attackScript.isInAttackRange)
+            {
+                
+                if(ProcessedDirection != new Vector3(0,0,0))
+                {
+                    orientation.LookAt(transform.position + ProcessedDirection);
+                    lastWatchDirection = transform.position + ProcessedDirection;
+                } else {
+                    orientation.LookAt(lastWatchDirection);
+                }
+            } 
         }
+
+        var step = rotationSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
     }
 
     public void Dash(InputAction.CallbackContext context)
     {
         if(context.started)
         {
-            if(beatManager.OnBeat && !isDashOnCoolDown && !beatManager.hasDoneActionOnCurrentBeat)
+            if(beatManager.OnBeat && !isDashOnCoolDown && beatManager.cooldownUntilNextAction == 0)
             {
-                beatManager.hasDoneActionOnCurrentBeat = true;
+                beatManager.cooldownUntilNextAction = 1;
                 isDashOnCoolDown = true;
                 StartCoroutine(Dashing());
-                DashSFX.Play();
             } else {
                 //Incorrect sound
             }

@@ -1,27 +1,36 @@
 using System.Collections;
+using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class BeatManager : MonoBehaviour
 {
+    [Header("Sound")]
     [SerializeField] AudioSource musicSource;
-
+    [SerializeField] AudioSource SFX;
+    
     [Header("Public")]
-    public bool hasDoneActionOnCurrentBeat;
+    [Tooltip("Whether or not player has done any action on the current beat.")]
+    public int cooldownUntilNextAction;
 
     [Header("Music attributes")]
     public float BPM;
+
+    [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
     public float MaxClickTimerOffset;
 
     [Header("Read-only")]
+
+    [Tooltip("Boolean read by other scripts for checking whether the music is currently on beat and an action can be done.")]
     public bool OnBeat;
 
-    float lastBeat;
-    float timeBetweenBeats;
+    //Private
+    private float lastBeat;
+    private float timeBetweenBeats;
 
     private float lastFrameMusicTime;
     private float currentFrameMusicTime;
 
-
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,32 +47,40 @@ public class BeatManager : MonoBehaviour
     {
         lastFrameMusicTime = currentFrameMusicTime;
         currentFrameMusicTime = musicSource.time;
-        
-        Debug.Log(musicSource.time);
+
+        //DEBUGGING
+        //Debug.Log(musicSource.time);
 
         if(currentFrameMusicTime > lastBeat + timeBetweenBeats && currentFrameMusicTime > lastFrameMusicTime)
         {
             lastBeat += timeBetweenBeats;
-            hasDoneActionOnCurrentBeat = false;
+
+            if(cooldownUntilNextAction != 0)
+            {
+                SFX.Play();
+                cooldownUntilNextAction = cooldownUntilNextAction - 1;
+            }
+            
             StartCoroutine(CheckForBeat(BPM));
         }
 
         if(currentFrameMusicTime < lastFrameMusicTime)
         {
             lastBeat = 0;
-            hasDoneActionOnCurrentBeat = false;
+            if(cooldownUntilNextAction != 0)
+            {
+                SFX.Play();
+                cooldownUntilNextAction = cooldownUntilNextAction - 1;
+            }
             StartCoroutine(CheckForBeat(BPM));
         }
     }
 
     private IEnumerator CheckForBeat(float LocalBPM)
     {       
-        yield return new WaitForSeconds(MaxClickTimerOffset/2);
         OnBeat = false;
 
         yield return new WaitForSeconds(60/LocalBPM-MaxClickTimerOffset);
         OnBeat = true;
-
-        //yield return new WaitForSeconds(MaxClickTimerOffset/2);
     }
 }
