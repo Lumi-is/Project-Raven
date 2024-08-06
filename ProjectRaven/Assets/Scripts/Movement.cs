@@ -36,6 +36,7 @@ public class Movement : MonoBehaviour
     [Header("Turning")]
     [SerializeField] Offensive attackScript;
     public Transform orientation;
+    public Transform gazeFollowedAttackable;
 
     [Range(0,1000)]
     [Tooltip("The speed at which player rotates towards a given point.")]
@@ -62,12 +63,15 @@ public class Movement : MonoBehaviour
         playerInputs = new InputSystem_Actions();
     }
 
-    private Vector3 lastWatchDirection;
-    // Update is called once per frame
+    //Direction where player character looks if no actions are pressed 
+    private Vector3 fallbackDirection;
+   
     void Update()
     {
+        //Rotates world Vector3 Matrix for 45 degrees in order for X and Z axis to work well with an isometric camera.
         var Matrix = Matrix4x4.Rotate(Quaternion.Euler(0,45,0));
 
+        //Normalizes a direction to move to based on the before-defined matrix and device input.
         Vector3 MoveDirection = new(move.ReadValue<Vector2>().normalized.x, 0, move.ReadValue<Vector2>().normalized.y);
         ProcessedDirection = Matrix.MultiplyPoint3x4(MoveDirection);
 
@@ -76,16 +80,17 @@ public class Movement : MonoBehaviour
             rb.linearVelocity = new Vector3(speed * Time.deltaTime * ProcessedDirection.x, rb.linearVelocity.y, speed * Time.deltaTime * ProcessedDirection.z);
 
             if(!attackScript.isInAttackRange)
-            {
-                
+            {  
                 if(ProcessedDirection != new Vector3(0,0,0))
                 {
                     orientation.LookAt(transform.position + ProcessedDirection);
-                    lastWatchDirection = transform.position + ProcessedDirection;
+                    fallbackDirection = transform.position + ProcessedDirection;
                 } else {
-                    orientation.LookAt(lastWatchDirection);
+                    orientation.LookAt(fallbackDirection);
                 }
-            } 
+            } else {
+                orientation.LookAt(gazeFollowedAttackable.position);
+            }
         }
 
         var step = rotationSpeed * Time.deltaTime;

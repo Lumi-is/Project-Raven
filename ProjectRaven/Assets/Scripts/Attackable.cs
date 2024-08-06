@@ -1,6 +1,7 @@
 using UnityEngine;
+using System;
 
-public class Enemy : MonoBehaviour
+public class Attackable : MonoBehaviour 
 {
     public float HP = 100; 
 
@@ -13,9 +14,14 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(HP < 0)
+        if(HP <= 0)
         {
-            Destroy(gameObject);
+            Offensive attackScript = FindAnyObjectByType<Offensive>();
+            Movement movement = FindAnyObjectByType<Movement>();
+
+            attackScript.isInAttackRange = false;
+            movement.gazeFollowedAttackable = null;
+            gameObject.SetActive(false);
         }
     }
 

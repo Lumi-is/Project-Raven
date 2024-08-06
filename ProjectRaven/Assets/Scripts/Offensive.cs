@@ -1,6 +1,10 @@
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using System;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Offensive : MonoBehaviour
 {
@@ -47,28 +51,39 @@ public class Offensive : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //Do not destroy on load
+        DontDestroyOnLoad(gameObject);
     }
+
+    private Transform AttackableTransform;
+    private WeaponPreset currentWeapon;
 
     // Update is called once per frame
     void Update()
     {
-        WeaponPreset currentWeapon = weaponArray[currentWeaponIndex];
+        // Make list of enemies that are in viscinity and then sort them, then make player always turn towards the closest one and hit it
 
-        for(int i = 0; i < FindObjectsByType<Enemy>(FindObjectsSortMode.None).Length; i++)
+        Attackable[] attackables = FindObjectsByType<Attackable>(FindObjectsSortMode.None);
+        Transform[] attackableTList = new Transform[attackables.Length];
+        currentWeapon = weaponArray[currentWeaponIndex];
+
+        for(int i = 0; i < attackables.Length; i++)
         {
-            Transform EnemyTransform = FindObjectsByType<Enemy>(FindObjectsSortMode.None)[i].transform;            
+            attackableTList[i] = attackables[i].transform;
+        }   
 
-            if(Vector3.Distance(transform.position, EnemyTransform.position) < currentWeapon.size && EnemyTransform != null)
-            {
-                Debug.Log("Check 1: "+isInAttackRange);
-                isInAttackRange = true;
-                Debug.Log("Check 2: "+isInAttackRange);
-                movement.orientation.LookAt(EnemyTransform.position);
-                Debug.Log("Check 3: "+isInAttackRange);
+        if(attackableTList == null) return;
 
-                //PROBLEM!
-            }
+        Transform closest = GetClosestAttackable(attackableTList);
+
+        if(closest == null) return;
+
+        if(Vector3.Distance(transform.position,closest.position) < currentWeapon.size)
+        {
+            isInAttackRange = true;
+            AttackableTransform = closest;
+            movement.gazeFollowedAttackable = AttackableTransform;
+        } else {
+            isInAttackRange = false;
         }
     }
 
@@ -87,20 +102,13 @@ public class Offensive : MonoBehaviour
         GameObject currentWeaponPrefab = weaponPrefabArray[currentWeaponIndex];
         Animator anim = currentWeaponPrefab.GetComponent<Animator>();        
 
-        for(int i = 0; i < FindObjectsByType<Enemy>(FindObjectsSortMode.None).Length; i++)
-        {
-            Transform EnemyTransform = FindObjectsByType<Enemy>(FindObjectsSortMode.None)[i].transform;
-
-            if(Vector3.Distance(transform.position, EnemyTransform.position) < currentWeapon.size)
-            {
-                transform.LookAt(EnemyTransform.position);
-                anim.SetTrigger("doPrimaryAttack");
-                Enemy enemy = EnemyTransform.GetComponent<Enemy>();
-                enemy.takeDamage(currentWeapon.damage);
-            }
-        }
-
-        
+        if(isInAttackRange)
+        {               
+            anim.SetTrigger("doPrimaryAttack");
+            
+            Attackable attackable = AttackableTransform.GetComponent<Attackable>();
+            attackable.takeDamage(currentWeapon.damage);
+        }       
     }
 
     public void RightClick(InputAction.CallbackContext context)
@@ -115,5 +123,22 @@ public class Offensive : MonoBehaviour
     public void SecondaryAttack()
     {
 
+    }
+
+    private Transform GetClosestAttackable(Transform[] attackables)
+    {
+        Transform tMin = null;
+        float minDistance = Mathf.Infinity;
+        Vector3 currentPos = transform.position;
+        foreach (Transform t in attackables)
+        {
+            float distance = Vector3.Distance(t.position, currentPos);
+            if (distance < minDistance)
+            {
+                tMin = t;
+                minDistance = distance;
+            }
+        }
+        return tMin;
     }
 }
