@@ -416,14 +416,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 378674048}
-  speed: 1000
+  speed: 1200
   dashForce: 50
   dashDuration: 0.1
   dashCooldownAmount: 0.1
   beatManager: {fileID: 378674051}
   attackScript: {fileID: 378674053}
   orientation: {fileID: 79896826}
-  rotationSpeed: 360
+  gazeFollowedAttackable: {fileID: 0}
+  rotationSpeed: 500
 --- !u!54 &378674048
 Rigidbody:
   m_ObjectHideFlags: 0
