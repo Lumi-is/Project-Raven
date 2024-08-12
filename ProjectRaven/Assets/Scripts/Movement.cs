@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEditor.EditorTools;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -60,6 +61,7 @@ public class Movement : MonoBehaviour
 
     void Awake()
     {
+        DOTween.Init();
         playerInputs = new InputSystem_Actions();
     }
 
@@ -118,7 +120,8 @@ public class Movement : MonoBehaviour
         isDashing = true;
         var DashDir = ProcessedDirection; 
 
-        rb.AddForce(DashDir * dashForce, ForceMode.Impulse);
+
+        rb.DOMove(transform.position + DashDir * dashForce, dashDuration);
 
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
