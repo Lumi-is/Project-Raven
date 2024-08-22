@@ -1,9 +1,6 @@
 using System.Collections;
 using DG.Tweening;
-using UnityEditor.EditorTools;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class Movement : MonoBehaviour

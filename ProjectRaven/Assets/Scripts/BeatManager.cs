@@ -1,5 +1,4 @@
 using System.Collections;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class BeatManager : MonoBehaviour
@@ -7,6 +6,7 @@ public class BeatManager : MonoBehaviour
     [Header("Sound")]
     [SerializeField] AudioSource musicSource;
     [SerializeField] AudioSource SFX;
+    [SerializeField] Spawner spawnerScript;
     
     [Header("Public")]
     [Tooltip("Whether or not player has done any action on the current beat.")]
@@ -17,6 +17,8 @@ public class BeatManager : MonoBehaviour
 
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
     public float MaxClickTimerOffset;
+
+    public float inputDelay;
 
     [Header("Read-only")]
 
@@ -40,8 +42,10 @@ public class BeatManager : MonoBehaviour
 
         musicSource.Play();
 
-        StartCoroutine(CheckForBeat(BPM));
+        StartCoroutine(BeatEnumerator(BPM, beatTimerOffsetLimit));
     }
+
+    private float beatTimerOffsetLimit;
 
     void Update()
     {
@@ -53,34 +57,37 @@ public class BeatManager : MonoBehaviour
 
         if(currentFrameMusicTime > lastBeat + timeBetweenBeats && currentFrameMusicTime > lastFrameMusicTime)
         {
+            beatTimerOffsetLimit = MaxClickTimerOffset/2-inputDelay;
             lastBeat += timeBetweenBeats;
 
             if(cooldownUntilNextAction != 0)
             {
                 SFX.Play();
-                cooldownUntilNextAction = cooldownUntilNextAction - 1;
+                cooldownUntilNextAction--;;
             }
             
-            StartCoroutine(CheckForBeat(BPM));
+            StartCoroutine(BeatEnumerator(BPM, beatTimerOffsetLimit));
         }
 
         if(currentFrameMusicTime < lastFrameMusicTime)
         {
+            beatTimerOffsetLimit = MaxClickTimerOffset/2-inputDelay;
             lastBeat = 0;
             if(cooldownUntilNextAction != 0)
             {
                 SFX.Play();
-                cooldownUntilNextAction = cooldownUntilNextAction - 1;
+                cooldownUntilNextAction--;
             }
-            StartCoroutine(CheckForBeat(BPM));
+            StartCoroutine(BeatEnumerator(BPM, beatTimerOffsetLimit));
         }
     }
 
-    private IEnumerator CheckForBeat(float LocalBPM)
-    {       
+    private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
+    {
+        spawnerScript.SpawnEnemies();
         OnBeat = false;
 
-        yield return new WaitForSeconds(60/LocalBPM-MaxClickTimerOffset);
+        yield return new WaitForSeconds(60/LocalBPM-offsetTime);
         OnBeat = true;
     }
 }
