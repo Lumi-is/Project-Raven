@@ -4,7 +4,7 @@ using UnityEngine;
 public class BeatManager : MonoBehaviour
 {
     [Header("Sound")]
-    [SerializeField] AudioSource musicSource;
+    public AudioSource musicSource;
     [SerializeField] AudioSource SFX;
     [SerializeField] Spawner spawnerScript;
     
@@ -16,9 +16,7 @@ public class BeatManager : MonoBehaviour
     public float BPM;
 
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
-    public float MaxClickTimerOffset;
-
-    public float inputDelay;
+    public float MaxOffset;
 
     [Header("Read-only")]
 
@@ -57,13 +55,13 @@ public class BeatManager : MonoBehaviour
 
         if(currentFrameMusicTime > lastBeat + timeBetweenBeats && currentFrameMusicTime > lastFrameMusicTime)
         {
-            beatTimerOffsetLimit = MaxClickTimerOffset/2-inputDelay;
+            beatTimerOffsetLimit = MaxOffset/2;
             lastBeat += timeBetweenBeats;
 
             if(cooldownUntilNextAction != 0)
             {
                 SFX.Play();
-                cooldownUntilNextAction--;;
+                cooldownUntilNextAction--;
             }
             
             StartCoroutine(BeatEnumerator(BPM, beatTimerOffsetLimit));
@@ -71,7 +69,8 @@ public class BeatManager : MonoBehaviour
 
         if(currentFrameMusicTime < lastFrameMusicTime)
         {
-            beatTimerOffsetLimit = MaxClickTimerOffset/2-inputDelay;
+            spawnerScript.beatCount = 0;
+            beatTimerOffsetLimit = MaxOffset/2;
             lastBeat = 0;
             if(cooldownUntilNextAction != 0)
             {

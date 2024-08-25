@@ -76,7 +76,7 @@ public class Movement : MonoBehaviour
 
         if(!isDashing)
         {
-            rb.linearVelocity = new Vector3(speed * Time.deltaTime * ProcessedDirection.x, rb.linearVelocity.y, speed * Time.deltaTime * ProcessedDirection.z);
+            rb.linearVelocity = new Vector3(speed * ProcessedDirection.x, rb.linearVelocity.y, speed * ProcessedDirection.z);
 
             if(!attackScript.isInAttackRange)
             {  

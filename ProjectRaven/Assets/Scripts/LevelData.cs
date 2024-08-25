@@ -23,6 +23,11 @@ public class LevelData : MonoBehaviour
         {
             UpdateData();
         }
+
+        if(maxConcurrentAttacks > beatDataArr[0].Count-1)
+        {
+            AppendListByY();
+        }
     }
 
     //Updates the X and YData variables with new information from the editor. 
@@ -35,17 +40,15 @@ public class LevelData : MonoBehaviour
 
     //Create a few lists and dictionaries to be used in spawner and level editor scripts.
 
-    //enemyTypeArr contains integer field lists which can then be used for attack type information in spawner scripts. This should be set in LevelEditor.
-    public List<List<int>> enemyTypeArr = new();
-
-    //attackPosArr contains positions in the same indexes as the enemyTypeArr. This is used to check where to spawn the above said attacks in the play area. 
-    public List<List<Vector2>> attackPosArr = new();
+    //beatDataArr contains integer field lists which can then be used for attack type information in spawner scripts. This should be set in LevelEditor.
+    //Also contains positions for the said indexes
+    public List<List<BeatData>> beatDataArr = new();
 
     //Dictionary to contain integer types of list with a name constant of type string
-    readonly Dictionary<string, List<int>> NamedEnemyTypesDict = new();
+    readonly Dictionary<string, List<BeatData>> NamedEnemyTypesDict = new();
 
     //Dictionary to contain Vector2 types of list with a name constant of type string
-    readonly Dictionary<string, List<Vector2>> NamedEnemyAttacksDict = new();
+    //readonly Dictionary<string, List<Vector2>> NamedEnemyAttacksDict = new();
 
 
     public void CreateArray()
@@ -58,17 +61,13 @@ public class LevelData : MonoBehaviour
             //In the two below, put data from users that are creating the level instead of "new". Remember to copy values instead of using a single variable.
             //Creates two items into dictionaries which can both be accessed with the same name
             NamedEnemyTypesDict.Add(Name,new());
-            NamedEnemyAttacksDict.Add(Name,new());
 
             //Add the said items to lists that contain data for the attack spawns
-            enemyTypeArr.Add(NamedEnemyTypesDict[Name]);
-            attackPosArr.Add(NamedEnemyAttacksDict[Name]);
+            beatDataArr.Add(NamedEnemyTypesDict[Name]);;
 
             for(int y = 0; y < YData; y++)
             {
-                //Both refer to ArrayY
-                enemyTypeArr[x].Add(0); 
-                attackPosArr[x].Add(new Vector2(0,0)); 
+                beatDataArr[x].Add(ScriptableObject.CreateInstance<BeatData>());
             }
         }
     }
@@ -80,24 +79,16 @@ public class LevelData : MonoBehaviour
         int xVar = 0;
         int yVar = 0;
 
-        Debug.Log(enemyTypeArr[0][0]);
-
-        Debug.Log(enemyTypeArr[0]);
-
         string print = "";
-
-        //Change this to change value :3 FOR TESTING ONLY!!!!
-        enemyTypeArr[30][0] = 1;
-        attackPosArr[30][0] = new Vector2(5,5);
 
         for(int i = 0; i < XData*YData; i++)
         {
-            if(xVar < enemyTypeArr.Count-1)
+            if(xVar < beatDataArr.Count-1)
             {
-                print = print + " " + enemyTypeArr[xVar][yVar];
+                print = print + " " + beatDataArr[xVar][yVar].attackType;
                 xVar++;
             } else {
-                print = print + " " + enemyTypeArr[xVar][yVar];
+                print = print + " " + beatDataArr[xVar][yVar].attackType;
                 xVar = 0;
                 yVar++;
                 Debug.Log(print);
@@ -108,17 +99,17 @@ public class LevelData : MonoBehaviour
 
     public void AppendListByY()
     {
-        for(int i = 0; i < enemyTypeArr.Count; i++)
+        for(int i = 0; i < beatDataArr.Count; i++)
         {
-            enemyTypeArr[i].Add(new());
+            beatDataArr[i].Add(ScriptableObject.CreateInstance<BeatData>());
         }
     }
 
     public void RemoveFromListByY()
     {
-        for(int i = 0; i < enemyTypeArr.Count; i++)
+        for(int i = 0; i < beatDataArr.Count; i++)
         {
-            enemyTypeArr[i].RemoveAt(enemyTypeArr[i].Count-1);
+            beatDataArr[i].RemoveAt(beatDataArr[i].Count-1);
         }
     }
 }

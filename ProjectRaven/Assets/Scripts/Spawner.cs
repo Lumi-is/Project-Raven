@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
@@ -12,6 +13,10 @@ public class Spawner : MonoBehaviour
     public void Awake()
     {
         beatCount = 0;
+
+        AudioClip musicResource = beatManager.musicSource.clip;
+
+        levelData.trackBeatAmount = (int)(musicResource.length/60 * beatManager.BPM);
     }
     
     Enemy enemyToSpawn;
@@ -20,20 +25,18 @@ public class Spawner : MonoBehaviour
     {
         if(beatCount >= levelData.trackBeatAmount) return;
 
-        List<int> enemyTypeArrY = levelData.enemyTypeArr[beatCount];
-        List<Vector2> attackPosArrY = levelData.attackPosArr[beatCount];
+        List<BeatData> beatDataArr = levelData.beatDataArr[beatCount];
 
-        for(int i = 0; i < enemyTypeArrY.Count; i++)
+        for(int i = 0; i < beatDataArr.Count; i++)
         {
-            if(enemyTypeArrY[i] != 0)
+            if(beatDataArr[i].attackType != 0)
             {
-                enemyToSpawn = GetEnemyType(enemyTypeArrY[i]);
+                enemyToSpawn = GetEnemyType(beatDataArr[i].attackType);
 
-                Vector3 instantiatePos = new(attackPosArrY[i].x, transform.position.y, attackPosArrY[i].y); 
+                Vector3 instantiatePos = new(beatDataArr[i].attackPos.x, transform.position.y, beatDataArr[i].attackPos.y); 
                 Instantiate(enemyToSpawn.enemyPrefab, instantiatePos, Quaternion.identity);
             }
         }
-
         beatCount++;
     }
 
