@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
@@ -13,10 +12,6 @@ public class Spawner : MonoBehaviour
     public void Awake()
     {
         beatCount = 0;
-
-        AudioClip musicResource = beatManager.musicSource.clip;
-
-        levelData.trackBeatAmount = (int)(musicResource.length/60 * beatManager.BPM);
     }
     
     Enemy enemyToSpawn;
