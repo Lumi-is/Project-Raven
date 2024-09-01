@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public LevelData levelData;
+    public LevelDataHandler levelData;
     public BeatManager beatManager;
     public List<Enemy> enemyTypeList = new();
 

@@ -1,19 +1,29 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using TMPro;
+using System.Collections.Generic;
+using UnityEditor.EditorTools;
+using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class LevelEditor : MonoBehaviour
 {
     [Header("Music")]
     public AudioClip musicResource;
 
-    private nullable<int> BPM = new();
+    public int? BPM = null;
 
     [Header("Data")]
-    [SerializeField] LevelList levelList;
+    [SerializeField] protected LevelList levelListScript;
+    public int editedLevel;
+
+    [SerializeField] LevelDataHandler levelDataHandler;
     [SerializeField] int maxAttackAmount;
 
     [Header("UI")]
+
+    [Tooltip("Preset for an empty node in the array.")]
     [SerializeField] GameObject UIArrayNodePrefab; 
 
     [Tooltip("How much each array node is offset from each other in the editor UI.")]
@@ -25,14 +35,14 @@ public class LevelEditor : MonoBehaviour
 
     [Tooltip("The object which will be enabled when showing users the option to either Create, edit or delete levels upon opening editor.")]
     [SerializeField] GameObject mainLevelEditOptionParent;
-    [SerializeField] InputField BPMInputField; 
+    [SerializeField] TMP_InputField BPMInputField; 
 
     [Tooltip("List of level layouts for users to choose from.")]
     [SerializeField] List<LevelLayout> levelLayoutList = new();
 
-    [SerializeField] int chosenLayout;
+    [SerializeField] int? chosenLayout;
 
-    [SerializeField] GameObject AttackerPrefabList;
+    [SerializeField] GameObject[] AttackerPrefabList;
 
     [Header("UI Integrated Scene preview")]
     [SerializeField] GameObject ScenePreviewWindow;
@@ -54,11 +64,15 @@ public class LevelEditor : MonoBehaviour
     private int localTrackBeatAmount;
 
     private List<Transform> UIArrayNodeList;
-
-    private LevelData currentLevelData;
-
+    private LevelData editedLevelData;
 
     //If pressed "Create new level" 
+    public void RequestLevelCreation()
+    {
+        //If request is accepted
+        //Add terms
+        StartCoroutine(OnCreateRequest());
+    }
     private IEnumerator OnCreateRequest()
     {
         mainLevelEditOptionParent.SetActive(false);
@@ -68,50 +82,52 @@ public class LevelEditor : MonoBehaviour
         //musicResource = dragAndDropData;
         //Ask user for BPM
         BPMInputField.gameObject.SetActive(true);
+    
+        //Reset to null in case a new level is being created
+        BPM = null;
         //Wait until user has put in a possible BPM and then continue
         yield return new WaitUntil(()=> BPM != null);
+        //Turn off UI for BPM input field if user has selected a BPM.
         BPMInputField.gameObject.SetActive(false);
 
         //Present user with options for the level layout (1 of n)
-        for(int i = 0; i<levelLayoutList.Count; i++)
+        foreach (LevelLayout levelLayout in levelLayoutList)
         {
-            levelLayoutList[i].gameObject.SetActive(true);
+            levelLayout.gameObject.SetActive(true);
+        }
+
+        //Reset to null in case a new level is being created
+        chosenLayout = null;
+        yield return new WaitUntil(()=> chosenLayout != null);
+
+        foreach (LevelLayout levelLayout in levelLayoutList)
+        {
+            levelLayout.gameObject.SetActive(false);
         }
         //Create level layout to the scene
-        LevelLayout currentLevelLayout = levelLayoutList[chosenLayout];
-        //Create the level from parameters
-        XData = musicResource.length/60 * BPM;
-        YData = maxAttackAmount; 
+        LevelLayout currentLevelLayout = levelLayoutList[(int)chosenLayout];
+
         //Make a new instance of leveldata and add it to levelList, return it for editing purposes
-        currentLevelData = CreateLevel();        
+        editedLevelData = CreateLevel();        
 
         //Create and show user the attack array - return it for editing purposes
         UIArrayNodeList = InstantiateAttackArr(); // Instantiate it under an object
 
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
         
+        //Go to edit mode
+
         ////
 
         //For-loop to go through the number list of attacks in the list, instantiate each one as a preview to the leveleditor scene
 
-        for(int i = 0; i < currentLevelData.beatDataArr[beatToEdit].Count; i++)
-        {
-            //Instantiate attack previews
-        }
-
         //SetActive false the grid parent which would show all the attacks
-        UIArrayParent.SetActive(false);
 
         //SetActive a popup which has a render texture to a camera 
         //SetActive a UIPanel behind the texture
-        ScenePreviewWindow.SetActive(true);
 
         //Get a number of different enemy prefabs and instantiate a list of buttons on top of each other - each button should have the following functionality:
         //Make a enemybuttonmanager script which holds a list of button indexes matching to enemy types - use a dictionary
-        for(int i = 0; i < AttackerPrefabList.Length; i++)
-        {
-            //Instantiate attacker buttons
-        }
 
         //Upon clicking, spawn enemy type in a ScreenToWorldPoint and set its transform as ScreenToWorldPoint until mouse button is released
         //If enemy is not touching a valid surface (not inside a hitbox), delete it 
@@ -124,6 +140,11 @@ public class LevelEditor : MonoBehaviour
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
+    public void RequestLevelEdit()
+    {
+        StartCoroutine(OnEditRequest());
+    }
+
     private IEnumerator OnEditRequest()
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,7 +152,7 @@ public class LevelEditor : MonoBehaviour
         //If pressed "Edit a level" 
         //Instantiate a list of levels (exclude all levels which are tagged non-custom)
         
-        //Upon selecting a level to edit
+        //Upon selecting a level to edit - change "editedlevel" to match index of said level
         //InstantiateAttackArr(); - Instantiate it under an object
 
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
@@ -150,6 +171,8 @@ public class LevelEditor : MonoBehaviour
         
         //Upon pressing an exit button, close the overlay and re-enable the grid parent object
 
+        return null;
+
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     }
@@ -166,19 +189,46 @@ public class LevelEditor : MonoBehaviour
 
         //Go back to the three main options
 
+        return null;
+
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    public void UpdateBPM()
+    {
+        if(int.TryParse(BPMInputField.text, out int value))
+        {
+            BPM = value;
+        } else {
+            BPM = null;
+            Debug.LogWarning("Incorrect type detected in BPM input field. Try again.");
+        }
+    }
+
+    public void UpdateLevelLayout(int layoutIndex)
+    {
+        chosenLayout = layoutIndex;
     }
 
     public LevelData CreateLevel()
     {
-        LevelData levelData = new();
-        levelData.CalulateBeatAmount();
-        localTrackBeatAmount = levelData.trackBeatAmount;
-        levelData.CreateArray();
-        //Debug
-        levelData.PrintArray();
+        //Calculate how many beats in a song
+        levelDataHandler.CalulateBeatAmount();
+        localTrackBeatAmount = levelDataHandler.trackBeatAmount;
 
-        levelList.AddLevel(levelData);
+        //Set variables to be used in creating the array
+        XData = localTrackBeatAmount;
+        YData = maxAttackAmount;
+
+        //Creating the array
+        levelDataHandler.CreateArray();
+        //Print the array
+        levelDataHandler.PrintArray();
+
+        LevelData levelData = levelDataHandler.SaveData();
+        levelListScript.AddLevel(levelData);
+        editedLevel = levelListScript.levelListData.Count - 1;
+
         return levelData;
     }
 
@@ -189,11 +239,41 @@ public class LevelEditor : MonoBehaviour
 
         for(int i = 0; i < localTrackBeatAmount; i++)
         {
-            var UIArrayNode = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition+new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
-            UIArrayNode.transform.parent = UIArrayParent;
-            UIArrayNodeList.Add(UIArrayNode);
+            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
+            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
+            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
+            nodeData.indexTag = i;
+
+            node.transform.SetParent(UIArrayParent);
+            UIArrayNodeList.Add(node.transform);
         }
+        UIArrayParent.gameObject.SetActive(true);
 
         return UIArrayNodeList;
+    }
+
+    public void OpenPreviewWindow(int BeatToEdit)
+    {
+        UIArrayParent.gameObject.SetActive(false);
+        ScenePreviewWindow.SetActive(true);
+    }
+
+    public void GoBack()
+    {
+        if(ScenePreviewWindow.activeSelf)
+        {
+            ScenePreviewWindow.SetActive(false);
+            UIArrayParent.gameObject.SetActive(true);
+            return;
+        } else if(UIArrayParent.gameObject.activeSelf)
+        {
+            UIArrayParent.gameObject.SetActive(false);
+
+            foreach(Transform child in UIArrayParent)
+            {
+                Destroy(child.gameObject);
+            }
+            mainLevelEditOptionParent.SetActive(true);
+        }
     }
 }
