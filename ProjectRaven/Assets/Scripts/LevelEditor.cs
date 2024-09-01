@@ -5,7 +5,6 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEditor.EditorTools;
 using UnityEngine.UI;
-using Unity.VisualScripting;
 
 public class LevelEditor : MonoBehaviour
 {
@@ -16,10 +15,11 @@ public class LevelEditor : MonoBehaviour
 
     [Header("Data")]
     [SerializeField] protected LevelList levelListScript;
+    [Tooltip("Level that is currently being edited.")]
     public int editedLevel;
 
-    [SerializeField] LevelDataHandler levelDataHandler;
-    [SerializeField] int maxAttackAmount;
+    [SerializeField] private LevelDataHandler levelDataHandler;
+    [SerializeField] private int maxAttackAmount;
 
     [Header("UI")]
 
@@ -58,8 +58,8 @@ public class LevelEditor : MonoBehaviour
         mainLevelEditOptionParent.SetActive(true);
     }
 
-    protected int XData;
-    protected int YData;
+    private protected int XData;
+    private protected int YData;
 
     private int localTrackBeatAmount;
 
@@ -75,29 +75,38 @@ public class LevelEditor : MonoBehaviour
     }
     private IEnumerator OnCreateRequest()
     {
+        //  Set parent for main options as false after choosing a primary function (create, edit or delete)
         mainLevelEditOptionParent.SetActive(false);
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        //Ask user for song // Use a default song for testing purposes, but in final build use the WindowsDragAndDrop scripts
-        //musicResource = dragAndDropData;
-        //Ask user for BPM
-        BPMInputField.gameObject.SetActive(true);
-    
-        //Reset to null in case a new level is being created
+        //  Ask user for song // Use a default song for testing purposes, but in final build use the WindowsDragAndDrop scripts
+        //  musicResource = dragAndDropData;
+
+        //  All 4 lines below are used to ask user for BPM:
+        //  Show input field for BPM
+        BPMInputField.gameObject.SetActive(true);    
+        //  Reset to null in case a new level is being created
         BPM = null;
-        //Wait until user has put in a possible BPM and then continue
+        //  Wait until user has put in a possible BPM and then continue. 
+        //  UpdateBPM updates BPM and checks whether or not what users put into the input field can be used as an integer 
         yield return new WaitUntil(()=> BPM != null);
-        //Turn off UI for BPM input field if user has selected a BPM.
+        //  Turn off UI for BPM input field if user has selected a BPM.
         BPMInputField.gameObject.SetActive(false);
 
-        //Present user with options for the level layout (1 of n)
+        /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //  Present user with options for the level layout (1 of n). 
+        //  !! For now no functionality for custom layouts !! 
         foreach (LevelLayout levelLayout in levelLayoutList)
         {
             levelLayout.gameObject.SetActive(true);
         }
+        //  ^ TO BE CONTINUED ^
 
-        //Reset to null in case a new level is being created
+        //  Reset to null in case a new level is being created
         chosenLayout = null;
+        // Wait until a layout is chosen by the user. This is done via UI element's void "OnClick()"
         yield return new WaitUntil(()=> chosenLayout != null);
 
         foreach (LevelLayout levelLayout in levelLayoutList)
@@ -138,6 +147,48 @@ public class LevelEditor : MonoBehaviour
         //Upon pressing an exit button, close the overlay and re-enable the grid parent object
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    public LevelData CreateLevel()
+    {
+        //Calculate how many beats in a song
+        levelDataHandler.CalulateBeatAmount();
+        localTrackBeatAmount = levelDataHandler.trackBeatAmount;
+
+        //Set variables to be used in creating the array
+        XData = localTrackBeatAmount;
+        YData = maxAttackAmount;
+
+        //Creating the array
+        levelDataHandler.CreateArray();
+        //Print the array
+        levelDataHandler.PrintArray();
+
+        LevelData levelData = levelDataHandler.SaveData();
+        levelListScript.AddLevel(levelData);
+        editedLevel = levelListScript.levelListData.Count - 1;
+
+        return levelData;
+    }
+
+    public List<Transform> InstantiateAttackArr()
+    {
+        //Create UI element for editing attackArray
+        List<Transform> UIArrayNodeList = new();
+
+        for(int i = 0; i < localTrackBeatAmount; i++)
+        {
+            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
+            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
+            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
+            nodeData.indexTag = i;
+
+            node.transform.SetParent(UIArrayParent);
+            UIArrayNodeList.Add(node.transform);
+        }
+        UIArrayParent.gameObject.SetActive(true);
+
+        return UIArrayNodeList;
     }
 
     public void RequestLevelEdit()
@@ -210,52 +261,12 @@ public class LevelEditor : MonoBehaviour
         chosenLayout = layoutIndex;
     }
 
-    public LevelData CreateLevel()
-    {
-        //Calculate how many beats in a song
-        levelDataHandler.CalulateBeatAmount();
-        localTrackBeatAmount = levelDataHandler.trackBeatAmount;
-
-        //Set variables to be used in creating the array
-        XData = localTrackBeatAmount;
-        YData = maxAttackAmount;
-
-        //Creating the array
-        levelDataHandler.CreateArray();
-        //Print the array
-        levelDataHandler.PrintArray();
-
-        LevelData levelData = levelDataHandler.SaveData();
-        levelListScript.AddLevel(levelData);
-        editedLevel = levelListScript.levelListData.Count - 1;
-
-        return levelData;
-    }
-
-    public List<Transform> InstantiateAttackArr()
-    {
-        //Create UI element for editing attackArray
-        List<Transform> UIArrayNodeList = new();
-
-        for(int i = 0; i < localTrackBeatAmount; i++)
-        {
-            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
-            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
-            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
-            nodeData.indexTag = i;
-
-            node.transform.SetParent(UIArrayParent);
-            UIArrayNodeList.Add(node.transform);
-        }
-        UIArrayParent.gameObject.SetActive(true);
-
-        return UIArrayNodeList;
-    }
-
     public void OpenPreviewWindow(int BeatToEdit)
     {
         UIArrayParent.gameObject.SetActive(false);
         ScenePreviewWindow.SetActive(true);
+        //TO BE CONTINUED
+        //for loop to go through the beatDataArr at x point beatToEdit, instantiate all said items to a preview
     }
 
     public void GoBack()

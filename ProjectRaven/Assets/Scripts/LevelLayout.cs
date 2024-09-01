@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class LevelLayout : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int indexTag;
+    public void OnClick()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        LevelEditor levelEditor = FindAnyObjectByType<LevelEditor>();
+        levelEditor.OpenPreviewWindow(indexTag);
     }
 }
