@@ -119,47 +119,7 @@ public class LevelEditor : MonoBehaviour
         //Go back to the start options
         //GoBack();
 
-        //Create and show user the attack array - return it for editing purposes
-        // Instantiate it under an object
-        //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
-        
-        ////
-
-        //For-loop to go through the number list of attacks in the list, instantiate each one as a preview to the leveleditor scene
-
-        //SetActive false the grid parent which would show all the attacks
-
-        //SetActive a popup which has a render texture to a camera 
-        //SetActive a UIPanel behind the texture
-
-        //Get a number of different enemy prefabs and instantiate a list of buttons on top of each other - each button should have the following functionality:
-        //Make a enemybuttonmanager script which holds a list of button indexes matching to enemy types - use a dictionary
-
-        //Upon clicking, spawn enemy type in a ScreenToWorldPoint and set its transform as ScreenToWorldPoint until mouse button is released
-        //If enemy is not touching a valid surface (not inside a hitbox), delete it 
-        
-        //If enemy is on correct surface: 
-        //Save enemy type and position to LevelData 
-        
-        //Upon pressing an exit button, close the overlay and re-enable the grid parent object
-
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    }
-
-    public void ShowLayoutList()
-    {
-        foreach (LevelLayout levelLayout in levelLayoutList)
-        {
-            levelLayout.gameObject.SetActive(true);
-        }
-    }
-
-    public void HideLayoutList()
-    {
-        foreach (LevelLayout levelLayout in levelLayoutList)
-        {
-            levelLayout.gameObject.SetActive(false);
-        }
     }
 
     public LevelData CreateLevel()
@@ -182,6 +142,22 @@ public class LevelEditor : MonoBehaviour
         editedLevel = levelListScript.levelListData.Count - 1;
 
         return levelData;
+    }
+
+    public void ShowLayoutList()
+    {
+        foreach (LevelLayout levelLayout in levelLayoutList)
+        {
+            levelLayout.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideLayoutList()
+    {
+        foreach (LevelLayout levelLayout in levelLayoutList)
+        {
+            levelLayout.gameObject.SetActive(false);
+        }
     }
 
     public List<Transform> InstantiateAttackArr()
@@ -222,10 +198,10 @@ public class LevelEditor : MonoBehaviour
         }
         
         //Upon selecting a level to edit - change "editedlevel" to match index of said level
-        //InstantiateAttackArr(); - Instantiate it under an object
+        //InstantiateAttackArr(); - Instantiate attack array under an object
         UIArrayNodeList = InstantiateAttackArr();
 
-        //Goes to OpenPreviewWindow:
+        //Goes to OpenPreviewWindow method via UI element on click:
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
         //For-loop to go through the number list of attacks in the list, instantiate each one as a preview to the leveleditor scene
 
@@ -242,7 +218,7 @@ public class LevelEditor : MonoBehaviour
         
         //Upon pressing an exit button, close the overlay and re-enable the grid parent object
 
-        return null;
+        yield return null;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -285,12 +261,8 @@ public class LevelEditor : MonoBehaviour
     {
         UIArrayParent.gameObject.SetActive(false);
         ScenePreviewWindow.SetActive(true);
-        //TO BE CONTINUED
-        //for loop to go through the beatDataArr at x point beatToEdit, instantiate all said items to a preview
-        for(int i = 0; i < maxAttackAmount; i++)
-        {
-            levelData.beatDataArr[BeatToEdit][i].InstantiatePreviewAttack();
-        }
+        //Spawns enemies on the beat that is currently open in editor
+        spawnerScript.SpawnEditorEnemies(BeatToEdit);
     }
 
     public void GoBack()

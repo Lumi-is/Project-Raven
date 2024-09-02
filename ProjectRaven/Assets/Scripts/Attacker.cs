@@ -6,9 +6,14 @@ public class Attacker : MonoBehaviour
     public BulletPreset bulletStatistics;
 
     GameObject bulletObject;
+
+    public bool isInEditor;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if(isInEditor) return;
+        
         GameObject model = bulletStatistics.model;
         bulletObject = Instantiate(model, transform.position, transform.rotation);
         bulletObject.transform.localScale = bulletObject.transform.localScale * bulletStatistics.size;

@@ -29,30 +29,36 @@ public class Spawner : MonoBehaviour
                 enemyToSpawn = GetEnemyType(beatDataArr[i].attackType);
 
                 Vector3 instantiatePos = new(beatDataArr[i].attackPos.x, transform.position.y, beatDataArr[i].attackPos.y); 
-                Instantiate(enemyToSpawn.enemyPrefab, instantiatePos, Quaternion.identity);
+                GameObject instantiatedObject = Instantiate(enemyToSpawn.enemyPrefab, instantiatePos, Quaternion.identity);
+
+                Attacker instantiatedAttacker = instantiatedObject.GetComponent<Attacker>();
+                instantiatedAttacker.isInEditor = true;
             }
         }
         beatCount++;
     }
 
-    public Enemy GetEnemyType(int enemyTypeIndex)
-    {
-        return enemyTypeList[enemyTypeIndex];
-    }
-
     public void SpawnEditorEnemies(int indexTag)
     {
-        int numberOfInstantiated;
+        int numberOfInstantiated = 0;
 
         List<BeatData> beatDataArr = levelData.beatDataArr[indexTag];
 
         ///////////////////////////////////////////////////////////////
 
-        if(numberOfInstantiated >= beatDataArr.Count) return;
-
-        for(numberOfInstantiated = 0; numberOfInstantiated < beatDataArr.Count; numberOfInstantiated++)
+        for(int i = 0; i < beatDataArr.Count; i++)
         {
-           // 
+            enemyToSpawn = enemyTypeList[beatDataArr[numberOfInstantiated].attackType];
+
+            Vector3 instantiatePos = new(beatDataArr[i].attackPos.x, transform.position.y, beatDataArr[i].attackPos.y); 
+            GameObject instantiatedObject = Instantiate(enemyToSpawn.enemyPrefab,instantiatePos, Quaternion.identity);
+
+            Attacker instantiatedAttacker = instantiatedObject.GetComponent<Attacker>();
+            instantiatedAttacker.isInEditor = true;
         }
+    }
+    public Enemy GetEnemyType(int enemyTypeIndex)
+    {
+        return enemyTypeList[enemyTypeIndex];
     }
 }
