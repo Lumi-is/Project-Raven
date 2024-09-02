@@ -39,4 +39,20 @@ public class Spawner : MonoBehaviour
     {
         return enemyTypeList[enemyTypeIndex];
     }
+
+    public void SpawnEditorEnemies(int indexTag)
+    {
+        int numberOfInstantiated;
+
+        List<BeatData> beatDataArr = levelData.beatDataArr[indexTag];
+
+        ///////////////////////////////////////////////////////////////
+
+        if(numberOfInstantiated >= beatDataArr.Count) return;
+
+        for(numberOfInstantiated = 0; numberOfInstantiated < beatDataArr.Count; numberOfInstantiated++)
+        {
+           // 
+        }
+    }
 }

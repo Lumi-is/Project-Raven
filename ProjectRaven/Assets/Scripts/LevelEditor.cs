@@ -20,6 +20,8 @@ public class LevelEditor : MonoBehaviour
 
     [SerializeField] private LevelDataHandler levelDataHandler;
     [SerializeField] private int maxAttackAmount;
+    [SerializeField] private Spawner spawnerScript;
+    //Make another method in spawner script to spawn enemies in a stationary mode.
 
     [Header("UI")]
 
@@ -98,10 +100,7 @@ public class LevelEditor : MonoBehaviour
 
         //  Present user with options for the level layout (1 of n). 
         //  !! For now no functionality for custom layouts !! 
-        foreach (LevelLayout levelLayout in levelLayoutList)
-        {
-            levelLayout.gameObject.SetActive(true);
-        }
+        ShowLayoutList();
         //  ^ TO BE CONTINUED ^
 
         //  Reset to null in case a new level is being created
@@ -109,23 +108,21 @@ public class LevelEditor : MonoBehaviour
         // Wait until a layout is chosen by the user. This is done via UI element's void "OnClick()"
         yield return new WaitUntil(()=> chosenLayout != null);
 
-        foreach (LevelLayout levelLayout in levelLayoutList)
-        {
-            levelLayout.gameObject.SetActive(false);
-        }
+        HideLayoutList();
         //Create level layout to the scene
         LevelLayout currentLevelLayout = levelLayoutList[(int)chosenLayout];
 
         //Make a new instance of leveldata and add it to levelList, return it for editing purposes
-        editedLevelData = CreateLevel();        
+        editedLevelData = CreateLevel();
+
+        RequestLevelEdit(editedLevelData);        
+        //Go back to the start options
+        //GoBack();
 
         //Create and show user the attack array - return it for editing purposes
-        UIArrayNodeList = InstantiateAttackArr(); // Instantiate it under an object
-
+        // Instantiate it under an object
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
         
-        //Go to edit mode
-
         ////
 
         //For-loop to go through the number list of attacks in the list, instantiate each one as a preview to the leveleditor scene
@@ -147,6 +144,22 @@ public class LevelEditor : MonoBehaviour
         //Upon pressing an exit button, close the overlay and re-enable the grid parent object
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    public void ShowLayoutList()
+    {
+        foreach (LevelLayout levelLayout in levelLayoutList)
+        {
+            levelLayout.gameObject.SetActive(true);
+        }
+    }
+
+    public void HideLayoutList()
+    {
+        foreach (LevelLayout levelLayout in levelLayoutList)
+        {
+            levelLayout.gameObject.SetActive(false);
+        }
     }
 
     public LevelData CreateLevel()
@@ -191,21 +204,28 @@ public class LevelEditor : MonoBehaviour
         return UIArrayNodeList;
     }
 
-    public void RequestLevelEdit()
+    public void RequestLevelEdit(LevelData levelData)
     {
-        StartCoroutine(OnEditRequest());
+        StartCoroutine(OnEditRequest(levelData));
     }
 
-    private IEnumerator OnEditRequest()
+    private IEnumerator OnEditRequest(LevelData levelData)
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         //If pressed "Edit a level" 
         //Instantiate a list of levels (exclude all levels which are tagged non-custom)
+        if(levelData == null)
+        {
+            //Instantiate options, yield WaitUntil
+            //TO BE CONTINUED
+        }
         
         //Upon selecting a level to edit - change "editedlevel" to match index of said level
         //InstantiateAttackArr(); - Instantiate it under an object
+        UIArrayNodeList = InstantiateAttackArr();
 
+        //Goes to OpenPreviewWindow:
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
         //For-loop to go through the number list of attacks in the list, instantiate each one as a preview to the leveleditor scene
 
@@ -256,7 +276,7 @@ public class LevelEditor : MonoBehaviour
         }
     }
 
-    public void UpdateLevelLayout(int layoutIndex)
+    public void UpdateLayout(int layoutIndex)
     {
         chosenLayout = layoutIndex;
     }
@@ -267,6 +287,10 @@ public class LevelEditor : MonoBehaviour
         ScenePreviewWindow.SetActive(true);
         //TO BE CONTINUED
         //for loop to go through the beatDataArr at x point beatToEdit, instantiate all said items to a preview
+        for(int i = 0; i < maxAttackAmount; i++)
+        {
+            levelData.beatDataArr[BeatToEdit][i].InstantiatePreviewAttack();
+        }
     }
 
     public void GoBack()
@@ -275,16 +299,30 @@ public class LevelEditor : MonoBehaviour
         {
             ScenePreviewWindow.SetActive(false);
             UIArrayParent.gameObject.SetActive(true);
-            return;
-        } else if(UIArrayParent.gameObject.activeSelf)
-        {
-            UIArrayParent.gameObject.SetActive(false);
+            
+        } else if(UIArrayParent.gameObject.activeSelf) {
 
-            foreach(Transform child in UIArrayParent)
-            {
-                Destroy(child.gameObject);
-            }
+            UIArrayParent.gameObject.SetActive(false);
+            DestroyUIArray();
             mainLevelEditOptionParent.SetActive(true);
+
+        } else {
+
+            mainLevelEditOptionParent.SetActive(true);
+            ScenePreviewWindow.SetActive(false);
+            UIArrayParent.gameObject.SetActive(false);
+            DestroyUIArray();
+            BPMInputField.gameObject.SetActive(false);
+            HideLayoutList();
+
+        }
+    }
+
+    public void DestroyUIArray()
+    {
+        foreach(Transform child in UIArrayParent)
+        {
+            Destroy(child.gameObject);
         }
     }
 }
