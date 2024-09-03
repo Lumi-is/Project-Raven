@@ -39,7 +39,7 @@ public class LevelDataHandler : LevelEditor
         LevelData levelData = ScriptableObject.CreateInstance<LevelData>();
 
         //Save data into levelData file, then return it to LevelEditor for editing purposes
-        levelData.SaveFile(beatDataArr, levelListScript.levelDataList.Count);
+        levelData.SaveFile(beatDataArr, levelList.levelDataList.Count);
         return levelData;
     }
 

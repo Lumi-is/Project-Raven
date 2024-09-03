@@ -14,7 +14,7 @@ public class LevelEditor : MonoBehaviour
     public int? BPM = null;
 
     [Header("Data")]
-    [SerializeField] protected LevelList levelListScript;
+    [SerializeField] protected LevelList levelList;
     [Tooltip("Level that is currently being edited.")]
     public int editedLevelIndex;
 
@@ -118,7 +118,7 @@ public class LevelEditor : MonoBehaviour
         //Make a new instance of leveldata and add it to levelList, return it for editing purposes
         editedLevelData = CreateLevel();
 
-        editedLevelIndex = levelListScript.levelDataList.Count - 1;
+        editedLevelIndex = levelList.levelDataList.Count - 1;
 
         RequestLevelEdit(editedLevelData);        
 
@@ -140,7 +140,7 @@ public class LevelEditor : MonoBehaviour
         levelDataHandler.PrintArray();
 
         LevelData levelData = levelDataHandler.SaveData();
-        levelListScript.AddLevel(levelData);
+        levelList.AddLevel(levelData);
 
         return levelData;
     }
@@ -161,33 +161,12 @@ public class LevelEditor : MonoBehaviour
         }
     }
 
-    public List<Transform> InstantiateAttackArr()
-    {
-        //Create UI element for editing attackArray
-        List<Transform> UIArrayNodeList = new();
-
-        for(int i = 0; i < trackBeatAmount; i++)
-        {
-            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
-            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
-            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
-            nodeData.levelEditor = this;
-            nodeData.indexTag = i;
-
-            node.transform.SetParent(UIArrayParent);
-            UIArrayNodeList.Add(node.transform);
-        }
-        UIArrayParent.gameObject.SetActive(true);
-
-        return UIArrayNodeList;
-    }
-
-    public void RequestLevelEdit(LevelData? levelData)
+    public void RequestLevelEdit(LevelData levelData)
     {
         StartCoroutine(OnEditRequest(levelData));
     }
 
-    private IEnumerator OnEditRequest(LevelData? levelData)
+    private IEnumerator OnEditRequest(LevelData levelData)
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -224,6 +203,27 @@ public class LevelEditor : MonoBehaviour
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    }
+
+    public List<Transform> InstantiateAttackArr()
+    {
+        //Create UI element for editing attackArray
+        List<Transform> UIArrayNodeList = new();
+
+        for(int i = 0; i < trackBeatAmount; i++)
+        {
+            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
+            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
+            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
+            nodeData.levelEditor = this;
+            nodeData.indexTag = i;
+
+            node.transform.SetParent(UIArrayParent);
+            UIArrayNodeList.Add(node.transform);
+        }
+        UIArrayParent.gameObject.SetActive(true);
+
+        return UIArrayNodeList;
     }
 
     private IEnumerator OnDeleteRequest()
@@ -284,7 +284,7 @@ public class LevelEditor : MonoBehaviour
     public void SavePreviewData(List<BeatData> EditedBeatArr)
     {
         //Make a new list according to data in the editedBeat and append list until matches the amount of attacks if amount of attacks is greater than list count
-        levelListScript.levelDataList[editedLevelIndex].beatDataArr[editedBeat] = EditedBeatArr;
+        levelList.levelDataList[editedLevelIndex].beatDataArr[editedBeat] = EditedBeatArr;
     }
 
     public void ClosePreviewWindow()
