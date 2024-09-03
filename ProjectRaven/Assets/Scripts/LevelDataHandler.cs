@@ -5,10 +5,6 @@ public class LevelDataHandler : LevelEditor
 {   
     //Create a few lists and dictionaries to be used in spawner and level editor scripts.
 
-    //beatDataArr contains integer field lists which can then be used for attack type information in spawner scripts. This should be set in LevelEditor and positions for the said indexes
-    public List<List<BeatData>> beatDataArr = new();
-    public int trackBeatAmount;
-
     //Dictionary to contain integer types of list with a name constant of type string
     readonly Dictionary<string, List<BeatData>> NamedEnemyTypesDict = new();
 
@@ -22,7 +18,7 @@ public class LevelDataHandler : LevelEditor
         for(int x = 0; x < XData; x++)
         {
             //Makes a temporary name for the following script to use in creating items. This name is never used later. 
-            string Name = editedLevel.ToString()+"yList"+x.ToString();
+            string Name = editedLevelIndex.ToString()+"yList"+x.ToString();
 
             //In the two below, put data from users that are creating the level instead of "new". Remember to copy values instead of using a single variable.
             //Creates two items into dictionaries which can both be accessed with the same name
@@ -41,7 +37,9 @@ public class LevelDataHandler : LevelEditor
     public LevelData SaveData()
     {
         LevelData levelData = ScriptableObject.CreateInstance<LevelData>();
-        levelData.SaveData(beatDataArr, levelListScript.levelListData.Count);
+
+        //Save data into levelData file, then return it to LevelEditor for editing purposes
+        levelData.SaveFile(beatDataArr, levelListScript.levelDataList.Count);
         return levelData;
     }
 

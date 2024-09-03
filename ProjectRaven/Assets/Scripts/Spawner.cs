@@ -32,7 +32,7 @@ public class Spawner : MonoBehaviour
                 GameObject instantiatedObject = Instantiate(enemyToSpawn.enemyPrefab, instantiatePos, Quaternion.identity);
 
                 Attacker instantiatedAttacker = instantiatedObject.GetComponent<Attacker>();
-                instantiatedAttacker.isInEditor = true;
+                instantiatedAttacker.isInEditor = false;
             }
         }
         beatCount++;
@@ -40,21 +40,21 @@ public class Spawner : MonoBehaviour
 
     public void SpawnEditorEnemies(int indexTag)
     {
-        int numberOfInstantiated = 0;
-
         List<BeatData> beatDataArr = levelData.beatDataArr[indexTag];
 
         ///////////////////////////////////////////////////////////////
 
         for(int i = 0; i < beatDataArr.Count; i++)
         {
-            enemyToSpawn = enemyTypeList[beatDataArr[numberOfInstantiated].attackType];
+            enemyToSpawn = enemyTypeList[beatDataArr[i].attackType];
 
             Vector3 instantiatePos = new(beatDataArr[i].attackPos.x, transform.position.y, beatDataArr[i].attackPos.y); 
             GameObject instantiatedObject = Instantiate(enemyToSpawn.enemyPrefab,instantiatePos, Quaternion.identity);
 
             Attacker instantiatedAttacker = instantiatedObject.GetComponent<Attacker>();
-            instantiatedAttacker.isInEditor = true;
+            
+            if(instantiatedAttacker == null) return;
+            instantiatedAttacker.isInEditor = true; 
         }
     }
     public Enemy GetEnemyType(int enemyTypeIndex)

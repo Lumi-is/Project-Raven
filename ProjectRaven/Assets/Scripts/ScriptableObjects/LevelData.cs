@@ -8,7 +8,7 @@ public class LevelData : ScriptableObject
     public int levelIndex;
     public List<List<BeatData>> beatDataArr;
 
-    public void SaveData(List<List<BeatData>> transferredData, int transferredIndex)
+    public void SaveFile(List<List<BeatData>> transferredData, int transferredIndex)
     {
         beatDataArr = transferredData;
         levelIndex = transferredIndex;
