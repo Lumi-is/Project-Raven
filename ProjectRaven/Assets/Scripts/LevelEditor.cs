@@ -118,8 +118,6 @@ public class LevelEditor : MonoBehaviour
         //Make a new instance of leveldata and add it to levelList, return it for editing purposes
         editedLevelData = CreateLevel();
 
-        editedLevelIndex = levelList.levelDataList.Count - 1;
-
         RequestLevelEdit(editedLevelData);        
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

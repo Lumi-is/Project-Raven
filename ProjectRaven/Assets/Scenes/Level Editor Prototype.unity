@@ -1173,7 +1173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   musicResource: {fileID: 8300000, guid: 8fd820e85ea713442892da542f66fa5b, type: 3}
-  levelListScript: {fileID: 11400000, guid: 3d4b0b496400c8348a3dcfe7e6c246c4, type: 2}
+  levelList: {fileID: 11400000, guid: 3d4b0b496400c8348a3dcfe7e6c246c4, type: 2}
   editedLevelIndex: 0
   levelDataHandler: {fileID: 1210562686}
   maxAttackAmount: 1
@@ -1186,6 +1186,7 @@ MonoBehaviour:
   BPMInputField: {fileID: 1389109052}
   levelLayoutList:
   - {fileID: 1771005092}
+  currentLevelLayout: {fileID: 0}
   AttackerPrefabList:
   - {fileID: 2842578946796855437, guid: 0f6706d34dad4244d948148e5ff7d10e, type: 3}
   - {fileID: 4267828427230163997, guid: 6e5c3d122b7539a47943285d2d3ed52f, type: 3}

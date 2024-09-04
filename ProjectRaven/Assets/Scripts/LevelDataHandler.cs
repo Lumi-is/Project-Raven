@@ -17,6 +17,7 @@ public class LevelDataHandler : LevelEditor
     {
         for(int x = 0; x < XData; x++)
         {
+            editedLevelIndex = levelList.levelDataList.Count - 1;
             //Makes a temporary name for the following script to use in creating items. This name is never used later. 
             string Name = editedLevelIndex.ToString()+"yList"+x.ToString();
 

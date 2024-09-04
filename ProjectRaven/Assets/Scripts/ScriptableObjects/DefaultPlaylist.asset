@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3958174cc00b92f49b8fb4c32a874f7d, type: 3}
   m_Name: DefaultPlaylist
   m_EditorClassIdentifier: 
+  levelDataList: []
