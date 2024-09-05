@@ -55,8 +55,6 @@ public class LevelEditor : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-
         //If scene is not leveleditor return; // Do not present options if not in leveleditor. //
 
         /*Give users three options: "Create new level", "Edit a level", "Delete a level"*/
@@ -135,9 +133,9 @@ public class LevelEditor : MonoBehaviour
         //Creating the array
         levelDataHandler.CreateArray();
         //Print the array
-        levelDataHandler.PrintArray();
+        //levelDataHandler.PrintArray();
 
-        LevelData levelData = levelDataHandler.SaveData();
+        LevelData levelData = levelDataHandler.CreateLevel();
         levelList.AddLevel(levelData);
 
         return levelData;
@@ -257,15 +255,12 @@ public class LevelEditor : MonoBehaviour
         chosenLayoutIndex = layoutIndex;
     }
 
-    bool PreviewWindowOpen = false;
-
     int editedBeat;
 
     public void OpenPreviewWindow(int beatToEdit)
     {
         editedBeat = beatToEdit;
 
-        PreviewWindowOpen = true;
         UIArrayParent.gameObject.SetActive(false);
         ScenePreviewWindow.SetActive(true);
         //Spawns enemies on the beat that is currently open in editor
@@ -287,7 +282,6 @@ public class LevelEditor : MonoBehaviour
 
     public void ClosePreviewWindow()
     {
-        PreviewWindowOpen = false;
         ScenePreviewWindow.SetActive(false);
         UIArrayParent.gameObject.SetActive(true);
 

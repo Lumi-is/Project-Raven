@@ -1,5 +1,8 @@
 using UnityEngine;
+using System;
+using System.IO;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 public class LevelDataHandler : LevelEditor 
 {   
@@ -30,17 +33,27 @@ public class LevelDataHandler : LevelEditor
 
             for(int y = 0; y < YData; y++)
             {
-                beatDataArr[x].Add(ScriptableObject.CreateInstance<BeatData>());
+                beatDataArr[x].Add(new());
             }
         }
     }
 
-    public LevelData SaveData()
+    new public LevelData CreateLevel()
     {
-        LevelData levelData = ScriptableObject.CreateInstance<LevelData>();
+        LevelData levelData = new();
 
-        //Save data into levelData file, then return it to LevelEditor for editing purposes
-        levelData.SaveFile(beatDataArr, levelList.levelDataList.Count);
+        FileDataHandler fileDataHandler = new();
+
+        string fullDataPath = Application.persistentDataPath + "/Data/Levels";
+        //Debug.Log(Path.Combine(fullDataPath,"Level"+editedLevelIndex.ToString()+"Data"));
+        fileDataHandler.SaveFile(levelData, fullDataPath, "Level"+editedLevelIndex.ToString()+"Data");
+        return levelData;
+    }    
+    public LevelData SetVariables(LevelData levelData, List<List<BeatData>> transferredData, int transferredIndex)
+    {
+        levelData.beatDataArr = transferredData;
+        levelData.levelIndex = transferredIndex;
+
         return levelData;
     }
 
@@ -72,7 +85,7 @@ public class LevelDataHandler : LevelEditor
     {
         for(int i = 0; i < beatDataArr.Count; i++)
         {
-            beatDataArr[i].Add(ScriptableObject.CreateInstance<BeatData>());
+            beatDataArr[i].Add(new());
         }
     }
 
@@ -82,5 +95,62 @@ public class LevelDataHandler : LevelEditor
         {
             beatDataArr[i].RemoveAt(beatDataArr[i].Count-1);
         }
+    }
+}
+
+[System.Serializable]
+public class LevelData
+{
+    public int levelIndex {get; set;}
+    public List<List<BeatData>> beatDataArr {get; set;}
+}
+
+public class BeatData
+{
+    public int attackType;
+    public Vector2 attackPos;
+}
+
+public class FileDataHandler
+{
+    public void SaveFile<T>(T dataToStore, string filePath, string fileName)
+    {
+        try {
+            if(!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
+            if(File.Exists(filePath))
+            {
+                OverwriteFile(dataToStore, filePath, fileName);
+            } else {
+                CreateFile(dataToStore, filePath, fileName);
+            }
+        } catch (Exception exception)
+        {
+            Debug.LogError("Error occured when trying to save data to file: " + filePath + " : " + exception);
+        }
+    }
+
+    private void CreateFile<T> (T dataToStore, string filePath, string fileName)
+    {
+        string jsonString = JsonConvert.SerializeObject(dataToStore);
+        string file = string.Format(filePath, fileName);
+        File.WriteAllText(filePath, file);
+    }
+
+    private void OverwriteFile<T> (T dataToStore, string filePath, string fileName)
+    {
+        File.Delete(Path.Combine(filePath,fileName));
+        CreateFile(dataToStore, filePath, fileName);
+    }
+
+    public T LoadFile<T>(string filePath)
+    {
+        string jsonString = File.ReadAllText(filePath);
+        var dataToLoad = JsonConvert.DeserializeObject<T>(jsonString);
+
+        return dataToLoad;
     }
 }
