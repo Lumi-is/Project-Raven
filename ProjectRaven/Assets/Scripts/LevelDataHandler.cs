@@ -2,19 +2,13 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 public class LevelDataHandler : LevelEditor 
 {   
     //Create a few lists and dictionaries to be used in spawner and level editor scripts.
 
     //Dictionary to contain integer types of list with a name constant of type string
-    readonly Dictionary<string, List<BeatData>> NamedEnemyTypesDict = new();
-
-    public void CalulateBeatAmount()
-    {
-        trackBeatAmount = (int)(musicResource.length/60 * BPM);
-    }
+    readonly Dictionary<string, BeatData> NamedEnemyDict = new();
 
     public void CreateArray()
     {
@@ -26,14 +20,15 @@ public class LevelDataHandler : LevelEditor
 
             //In the two below, put data from users that are creating the level instead of "new". Remember to copy values instead of using a single variable.
             //Creates two items into dictionaries which can both be accessed with the same name
-            NamedEnemyTypesDict.Add(Name,new());
+            NamedEnemyDict.Add(Name,new());
 
             //Add the said items to lists that contain data for the attack spawns
-            beatDataArr.Add(NamedEnemyTypesDict[Name]);;
+            beatDataArr.Add(NamedEnemyDict[Name]);
 
             for(int y = 0; y < YData; y++)
             {
-                beatDataArr[x].Add(new());
+                beatDataArr[x].attackTypeList.Add(new());
+                beatDataArr[x].attackPosList.Add(new());
             }
         }
     }
@@ -44,113 +39,79 @@ public class LevelDataHandler : LevelEditor
 
         FileDataHandler fileDataHandler = new();
 
-        string fullDataPath = Application.persistentDataPath + "/Data/Levels";
+        string name = "Level"+editedLevelIndex.ToString()+"Data.json";
+        string assetFilePath = "/Data/Levels/";
+        string fullFilePath = Path.Combine(Application.persistentDataPath + assetFilePath + name);
+
+
         //Debug.Log(Path.Combine(fullDataPath,"Level"+editedLevelIndex.ToString()+"Data"));
-        fileDataHandler.SaveFile(levelData, fullDataPath, "Level"+editedLevelIndex.ToString()+"Data");
+        fileDataHandler.SaveFile(levelData, fullFilePath);
         return levelData;
     }    
-    public LevelData SetVariables(LevelData levelData, List<List<BeatData>> transferredData, int transferredIndex)
-    {
-        levelData.beatDataArr = transferredData;
-        levelData.levelIndex = transferredIndex;
-
-        return levelData;
-    }
-
     //Goes through the 2D list and prints attack type information on each element
-    public void PrintArray()
-    {
-        int x = 0;
-        int y = 0;
-
-        string print = "";
-
-        for(int i = 0; i < XData*YData; i++)
-        {
-            if(x < beatDataArr.Count-1)
-            {
-                print = print + " " + beatDataArr[x][y].attackType;
-                x++;
-            } else {
-                print = print + " " + beatDataArr[x][y].attackType;
-                x = 0;
-                y++;
-                Debug.Log(print);
-                print = "";
-            }
-        }
-    }
 
     public void AppendListByY()
     {
         for(int i = 0; i < beatDataArr.Count; i++)
         {
-            beatDataArr[i].Add(new());
+            beatDataArr[i].attackTypeList.Add(new());
+            beatDataArr[i].attackPosList.Add(new());
         }
     }
-
-    public void RemoveFromListByY()
-    {
-        for(int i = 0; i < beatDataArr.Count; i++)
-        {
-            beatDataArr[i].RemoveAt(beatDataArr[i].Count-1);
-        }
-    }
-}
-
-[System.Serializable]
-public class LevelData
-{
-    public int levelIndex {get; set;}
-    public List<List<BeatData>> beatDataArr {get; set;}
-}
-
-public class BeatData
-{
-    public int attackType;
-    public Vector2 attackPos;
 }
 
 public class FileDataHandler
 {
-    public void SaveFile<T>(T dataToStore, string filePath, string fileName)
+    public void SaveFile<T>(T dataToStore, string fullFilePath)
     {
         try {
-            if(!Directory.Exists(filePath))
+            if(File.Exists(fullFilePath))
             {
-                Directory.CreateDirectory(filePath);
-            }
-
-            if(File.Exists(filePath))
-            {
-                OverwriteFile(dataToStore, filePath, fileName);
+                OverwriteFile(dataToStore, fullFilePath);
             } else {
-                CreateFile(dataToStore, filePath, fileName);
+                CreateFile(dataToStore, fullFilePath);
             }
         } catch (Exception exception)
         {
-            Debug.LogError("Error occured when trying to save data to file: " + filePath + " : " + exception);
+            Debug.LogError("Error occured when trying to save data to file: " + fullFilePath + " : " + exception);
         }
     }
 
-    private void CreateFile<T> (T dataToStore, string filePath, string fileName)
+    private void CreateFile<T> (T dataToStore, string fullFilePath)
     {
-        string jsonString = JsonConvert.SerializeObject(dataToStore);
-        string file = string.Format(filePath, fileName);
-        File.WriteAllText(filePath, file);
+        Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
+        string jsonData = JsonUtility.ToJson(dataToStore, true);
+
+        using FileStream stream = new(fullFilePath, FileMode.Create);
+        using StreamWriter writer = new(stream);
+        writer.Write(jsonData);
     }
 
-    private void OverwriteFile<T> (T dataToStore, string filePath, string fileName)
+    private void OverwriteFile<T> (T dataToStore, string fullFilePath)
     {
-        File.Delete(Path.Combine(filePath,fileName));
-        CreateFile(dataToStore, filePath, fileName);
+        File.Delete(fullFilePath);
+        CreateFile(dataToStore, fullFilePath);
     }
 
-    public T LoadFile<T>(string filePath)
+    public T LoadFile<T>(string fullFilePath)
     {
-        string jsonString = File.ReadAllText(filePath);
-        var dataToLoad = JsonConvert.DeserializeObject<T>(jsonString);
+        string jsonString = File.ReadAllText(fullFilePath);
+        var dataToLoad = JsonUtility.FromJson<T>(jsonString);
 
         return dataToLoad;
     }
+}
+
+[Serializable]
+public class LevelData
+{
+    public int LevelIndex;
+    public List<BeatData> BeatDataArr;
+}
+
+[Serializable]
+public class BeatData
+{
+    public List<int> attackTypeList;
+    public List<Vector2> attackPosList;
 }

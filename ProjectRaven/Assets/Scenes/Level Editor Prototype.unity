@@ -1182,11 +1182,9 @@ MonoBehaviour:
   UIListElementOffset: 250
   defaultUIArrayPosition: {x: 0, y: 0}
   UIArrayParent: {fileID: 643289623}
+  beatDataArr: []
   mainLevelEditOptionParent: {fileID: 867280249}
   BPMInputField: {fileID: 1389109052}
-  levelLayoutList:
-  - {fileID: 1771005092}
-  currentLevelLayout: {fileID: 0}
   AttackerPrefabList:
   - {fileID: 2842578946796855437, guid: 0f6706d34dad4244d948148e5ff7d10e, type: 3}
   - {fileID: 4267828427230163997, guid: 6e5c3d122b7539a47943285d2d3ed52f, type: 3}
@@ -1936,17 +1934,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2203068712644868513, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
   m_PrefabInstance: {fileID: 4404964609674782721}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1771005092 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2233496658982915915, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
-  m_PrefabInstance: {fileID: 4404964609674782721}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbb85cdca30ab574aa493f7e2127ca8d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1800967486
 GameObject:
   m_ObjectHideFlags: 0
@@ -2336,12 +2323,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 55691046}
     m_Modifications:
     - target: {fileID: 1706991969160776078, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1706991969160776078, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1210562686}
     - target: {fileID: 1706991969160776078, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: UpdateLayout
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1706991969160776078, guid: 443cb737331dfd541afe797ee6ce007c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_IntArgument

@@ -6,6 +6,6 @@ public class UIArrayNode : MonoBehaviour
     public int indexTag;
     public void OnClick()
     {
-        levelEditor.OpenPreviewWindow(indexTag);
+        //Open preview window
     }
 }
