@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2371896204575542232}
   - component: {fileID: 2099981585022625001}
   m_Layer: 5
-  m_Name: UIArrayNodePrefab
+  m_Name: UIListNode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

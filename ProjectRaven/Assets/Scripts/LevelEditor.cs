@@ -12,64 +12,77 @@ public class LevelEditor : MonoBehaviour
     public int? BPM = null;
 
     [Header("Data")]
-    [SerializeField] protected LevelList levelList;
-    [Tooltip("Level that is currently being edited.")]
-    public int editedLevelIndex;
 
-    [SerializeField] private LevelDataHandler levelDataHandler;
-    [SerializeField] private int maxAttackAmount;
-    [SerializeField] private Spawner spawnerScript;
+    [Tooltip("List of level layouts for users to choose from.")]
+    [SerializeField] protected LevelList levelList;
+
+    private LevelData levelData;
+
+    [Tooltip("Index of a level in levelList that is currently being edited.")]
+    public int levelInEdit;
+
+    [Tooltip("Number of beats in the song which is being edited")]
+    public int trackBeatAmount;
+
+    [Tooltip("Maximum number of concurrent instantiated attacks per beat.")]
+    public int maxAttackAmount = 1;
+
     //Make another method in spawner script to spawn enemies in a stationary mode.
 
-    [Header("UI")]
+    [Header("UI (BeatList)")]
 
-    [Tooltip("Preset for an empty node in the array.")]
-    [SerializeField] GameObject UIArrayNodePrefab; 
+    [Tooltip("List of UI elements that represent [beatList]")]
+    [SerializeField] private List<Transform> UIBeatList;
+
+    [Tooltip("Prefab for an empty node in the UI list")]
+    [SerializeField] GameObject UIListNode; 
 
     [Tooltip("How much each array node is offset from each other in the editor UI.")]
     [SerializeField] int UIListElementOffset;
 
     [Tooltip("Position where the UI array starts from.")]
-    [SerializeField] Vector2 defaultUIArrayPosition;
-    [SerializeField] Transform UIArrayParent;
-    public List<BeatData> beatDataArr = new();
+    [SerializeField] Vector2 UIListPos;
 
-    [Tooltip("The object which will be enabled when showing users the option to either Create, edit or delete levels upon opening editor.")]
-    [SerializeField] GameObject mainLevelEditOptionParent;
-    [SerializeField] TMP_InputField BPMInputField; 
+    [Tooltip("Parent object under which [UIBeatList] will be instantiated.")]
+    [SerializeField] Transform UIListParent;
 
-    [Tooltip("List of level layouts for users to choose from.")]
+    [Header("UI (Scene preview)")]
 
-    [SerializeField] GameObject[] AttackerPrefabList;
-
-    [Header("UI Integrated Scene preview")]
+    [Tooltip("Preview window for scene editing.")]
     [SerializeField] GameObject ScenePreviewWindow;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("UI (other)")]
+
+    [Tooltip("User input field which will ask users for the song BPM")]
+    [SerializeField] TMP_InputField BPMInputField; 
+
+    [Tooltip("The object which will be enabled when showing users the option to either Create, edit or delete levels upon opening editor.")]
+    [SerializeField] GameObject optionRootParent;
+
+
+    [Header("Singleton scripts")]
+    [SerializeField] private Spawner spawnerScript;
+    [SerializeField] private LevelDataHandler levelDataHandler;
+
+
+
+    // Awake is called once before the first execution of Update after the MonoBehaviour is created regardless of whether or not the instance is active
     void Awake()
     {
         //If scene is not leveleditor return; // Do not present options if not in leveleditor. //
 
         /*Give users three options: "Create new level", "Edit a level", "Delete a level"*/
-        mainLevelEditOptionParent.SetActive(true);
+        optionRootParent.SetActive(true);
     }
 
-    private protected int XData;
-    private protected int YData;
-
-    public int trackBeatAmount;
-
-    private List<Transform> UIArrayNodeList;
-    private LevelData levelData;
-
+    //Upon clicking "Create a new level" 
     public void RequestLevelCreation()
     {
         StartCoroutine(OnCreateRequest());
     }
+    
     private IEnumerator OnCreateRequest()
-    {
-        mainLevelEditOptionParent.SetActive(false);
-        BPMInputField.gameObject.SetActive(true);    
+    {   
         BPM = null;
         //  Wait until user has put in a possible BPM and then continue. 
         //  UpdateBPM updates BPM and checks whether or not what users put into the input field can be used as an integer 
@@ -87,24 +100,11 @@ public class LevelEditor : MonoBehaviour
     public LevelData CreateLevel()
     {
         //Calculate how many beats in a song
-        CalculateBeatAmount();
-
-        //Set variables to be used in creating the array
-        XData = trackBeatAmount;
-        YData = maxAttackAmount;
-
-        //Creating the array
-        levelDataHandler.CreateArray();
+        trackBeatAmount = (int)(musicResource.length/60 * BPM);
 
         LevelData levelData = levelDataHandler.CreateLevel();
-        levelList.AddLevel(levelData);
 
         return levelData;
-    }
-
-    public void CalculateBeatAmount()
-    {
-        trackBeatAmount = (int)(musicResource.length/60 * BPM);
     }
 
     public void RequestLevelEdit(LevelData levelData)
@@ -115,14 +115,13 @@ public class LevelEditor : MonoBehaviour
     private IEnumerator OnEditRequest(LevelData levelData)
     {
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         if(levelData == null)
         {
             //Instantiate level options if editor not opened via creation of a new level, yield WaitUntil one is chosen
             //TO BE CONTINUED
         } 
 
-        UIArrayNodeList = InstantiateAttackArr();
+        UIBeatList = InstantiateAttackArr();
 
         //Goes to OpenPreviewWindow method via UI element on click:
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
@@ -155,15 +154,15 @@ public class LevelEditor : MonoBehaviour
         for(int i = 0; i < trackBeatAmount; i++)
         {
             Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
-            var node = Instantiate(UIArrayNodePrefab, defaultUIArrayPosition + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
+            var node = Instantiate(UIListNode, UIListPos + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
             UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
             nodeData.levelEditor = this;
             nodeData.indexTag = i;
 
-            node.transform.SetParent(UIArrayParent);
+            node.transform.SetParent(UIListParent);
             UIArrayNodeList.Add(node.transform);
         }
-        UIArrayParent.gameObject.SetActive(true);
+        UIListParent.gameObject.SetActive(true);
 
         return UIArrayNodeList;
     }
@@ -199,7 +198,7 @@ public class LevelEditor : MonoBehaviour
     public void ClosePreviewWindow()
     {
         ScenePreviewWindow.SetActive(false);
-        UIArrayParent.gameObject.SetActive(true);
+        UIListParent.gameObject.SetActive(true);
     }
 
     public void GoBack()
@@ -207,17 +206,17 @@ public class LevelEditor : MonoBehaviour
         if(ScenePreviewWindow.activeSelf)
         {
             ScenePreviewWindow.SetActive(false);
-            UIArrayParent.gameObject.SetActive(true);
+            UIListParent.gameObject.SetActive(true);
             
-        } else if(UIArrayParent.gameObject.activeSelf) {
+        } else if(UIListParent.gameObject.activeSelf) {
 
-            UIArrayParent.gameObject.SetActive(false);
+            UIListParent.gameObject.SetActive(false);
             DestroyUIArray();
-            mainLevelEditOptionParent.SetActive(true);
+            optionRootParent.SetActive(true);
         } else {
-            mainLevelEditOptionParent.SetActive(true);
+            optionRootParent.SetActive(true);
             ScenePreviewWindow.SetActive(false);
-            UIArrayParent.gameObject.SetActive(false);
+            UIListParent.gameObject.SetActive(false);
             DestroyUIArray();
             BPMInputField.gameObject.SetActive(false);
         }
@@ -225,7 +224,7 @@ public class LevelEditor : MonoBehaviour
 
     public void DestroyUIArray()
     {
-        foreach(Transform child in UIArrayParent)
+        foreach(Transform child in UIListParent)
         {
             Destroy(child.gameObject);
         }
