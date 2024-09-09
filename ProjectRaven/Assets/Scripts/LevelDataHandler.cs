@@ -6,13 +6,10 @@ using Newtonsoft.Json;
 
 public class LevelDataHandler : LevelEditor 
 {   
-    //Create a few lists and dictionaries to be used in spawner and level editor scripts.
-
-    //Dictionary to contain integer types of list with a name constant of type string
-    readonly Dictionary<string, List<BeatData>> NamedEnemyDict = new();
-
     public List<List<BeatData>> NewBeatList()
     {
+        //Dictionary to contain integer types of list with a name constant of type string
+        Dictionary<string, List<BeatData>> NamedEnemyDict = new();
         List<List<BeatData>> beatList = new();
         levelInEdit = levelList.levelDataList.Count;
 
@@ -38,37 +35,45 @@ public class LevelDataHandler : LevelEditor
 
     BeatData NewBeatData(int attackType, Vector2 attackPos)
     {
-        BeatData newBeatData = new();
-        newBeatData.attackType = attackType;
+        BeatData newBeatData = new()
+        {
+            attackType = attackType
+        };
         newBeatData.attackPos[0] = attackPos.x;
         newBeatData.attackPos[1] = attackPos.y;
 
         return newBeatData;
     }
 
-    new public LevelData CreateLevel()
+    public LevelData CreateLevel()
     {
+        trackBeatAmount = (int)(musicResource.length/60 * BPM);
         levelInEdit = levelList.levelDataList.Count;
 
-        LevelData levelData = new();
-        levelData.beatList = NewBeatList();
-        levelData.LevelIndex = levelInEdit;
+        LevelData levelData = new()
+        {
+            beatList = NewBeatList(),
+            LevelIndex = levelInEdit
+        };
 
         FileDataHandler fileDataHandler = new();
 
-        string name = "Level"+levelInEdit.ToString()+"Data.json";
+        string name;
+        if(levelName.Equals("default"))
+        {
+            name = "Level"+levelInEdit.ToString()+"Data.json";
+        } else {
+            name = levelName + ".json";
+        }
         string assetFilePath = "/Data/Levels/";
         string fullFilePath = Path.Combine(Application.persistentDataPath + assetFilePath + name);
 
-
-        //Debug.Log(Path.Combine(fullDataPath,"Level"+editedLevelIndex.ToString()+"Data"));
         fileDataHandler.SaveFile(levelData, fullFilePath);
 
         levelList.AddLevel(levelData);
 
         return levelData;     
     }    
-    //Goes through the 2D list and prints attack type information on each element
 
     public List<List<BeatData>> AppendListByY(List<List<BeatData>> beatList)
     {
@@ -92,20 +97,24 @@ public class FileDataHandler
             } else {
                 CreateFile(dataToStore, fullFilePath);
             }
-        } catch (Exception exception)
-        {
-            Debug.LogError("Error occured when trying to save data to file: " + fullFilePath + " : " + exception);
+        } catch (Exception e) {
+            Debug.LogError("Error occured when trying to save data to file: '" + fullFilePath + "' - Error at: " + e);
         }
     }
 
     private void CreateFile<T> (T dataToStore, string fullFilePath)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
-        string jsonData = JsonConvert.SerializeObject(dataToStore);
+        try{
+            Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
+            string jsonData = JsonConvert.SerializeObject(dataToStore, Formatting.Indented);
 
-        using FileStream stream = new(fullFilePath, FileMode.Create);
-        using StreamWriter writer = new(stream);
-        writer.Write(jsonData);
+            using FileStream stream = new(fullFilePath, FileMode.Create);
+            using StreamWriter writer = new(stream);
+            writer.Write(jsonData);
+        } catch (Exception e) {
+            Debug.LogError("Failed to create file '"+ fullFilePath + "' - Error at: " + e);
+        }
+        
     }
 
     private void OverwriteFile<T> (T dataToStore, string fullFilePath)
@@ -113,28 +122,35 @@ public class FileDataHandler
         try {
             File.Delete(fullFilePath);
             CreateFile(dataToStore, fullFilePath);
-        } catch (Exception exception) {
-            Debug.LogError("Error overwriting the data - "+exception);
+        } catch (Exception e) {
+            Debug.LogError("Failed to overwrite file '"+ fullFilePath + "' - Error at: " + e);
         }
     }
 
     public T LoadFile<T>(string fullFilePath)
     {
-        string jsonString = File.ReadAllText(fullFilePath);
-        var dataToLoad = JsonConvert.DeserializeObject<T>(jsonString);
+        try {
+            string jsonString = File.ReadAllText(fullFilePath);
+            var dataToLoad = JsonConvert.DeserializeObject<T>(jsonString);
 
-        return dataToLoad;
+            return dataToLoad;
+        } catch (Exception e) {
+            Debug.LogError("Failed to load data from '"+fullFilePath+"'. - Error at: "+e);
+
+            return default;
+        }
+        
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class LevelData
 {
     public int LevelIndex;
     public List<List<BeatData>> beatList;
 }
 
-[System.Serializable]
+[Serializable]
 public class BeatData
 {
     public int attackType;

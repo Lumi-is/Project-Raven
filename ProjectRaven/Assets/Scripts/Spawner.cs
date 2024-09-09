@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public LevelDataHandler levelData;
+    public LevelDataHandler dataHandler;
     public BeatManager beatManager;
     public List<Enemy> enemyTypeList = new();
 
@@ -19,12 +19,12 @@ public class Spawner : MonoBehaviour
         
     }
 
-    public void SpawnEditorEnemies(int indexTag)
+    public void SpawnEditorEnemies()
     {
         
     }
-    public Enemy GetEnemyType(int enemyTypeIndex)
+    public Enemy GetAttackType(int attackIndex)
     {
-        return enemyTypeList[enemyTypeIndex];
+        return enemyTypeList[attackIndex];
     }
 }

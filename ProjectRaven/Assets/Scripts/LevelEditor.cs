@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using TMPro;
@@ -16,9 +15,15 @@ public class LevelEditor : MonoBehaviour
     [Tooltip("List of level layouts for users to choose from.")]
     [SerializeField] protected LevelList levelList;
 
+    [Tooltip("Input field for users to put the desired level name to.")]
+    [SerializeField] protected TMP_InputField nameInputField;
+
+    //Name of the currently edited level. This is referenced in scripts, used in saving files and **should not be changed directly via files**.
+    protected string levelName;
+
     private LevelData levelData;
 
-    [Tooltip("Index of a level in levelList that is currently being edited.")]
+    [Tooltip("Index of a level in [levelList] that is currently being edited.")]
     public int levelInEdit;
 
     [Tooltip("Number of beats in the song which is being edited")]
@@ -69,43 +74,39 @@ public class LevelEditor : MonoBehaviour
     // Awake is called once before the first execution of Update after the MonoBehaviour is created regardless of whether or not the instance is active
     void Awake()
     {
-        //If scene is not leveleditor return; // Do not present options if not in leveleditor. //
-
-        /*Give users three options: "Create new level", "Edit a level", "Delete a level"*/
+        //Give users three options: "Create new level", "Edit a level", "Delete a level"
         optionRootParent.SetActive(true);
     }
+
+
 
     //Upon clicking "Create a new level" 
     public void RequestLevelCreation()
     {
         StartCoroutine(OnCreateRequest());
     }
-    
+
     private IEnumerator OnCreateRequest()
     {   
+        levelName = null; 
+
+        yield return new WaitUntil(()=> levelName != null);
+
+        nameInputField.gameObject.SetActive(false);
+        BPMInputField.gameObject.SetActive(true);
+
         BPM = null;
         //  Wait until user has put in a possible BPM and then continue. 
-        //  UpdateBPM updates BPM and checks whether or not what users put into the input field can be used as an integer 
+        //  UpdateBPM updates BPM value and checks whether or not what users put into the input field can be used as an integer. Decimal BPM values are not supported. 
         yield return new WaitUntil(()=> BPM != null);
 
         BPMInputField.gameObject.SetActive(false);
+        levelData = levelDataHandler.CreateLevel();
 
-        levelData = CreateLevel();
-
-        RequestLevelEdit(levelData);        
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        RequestLevelEdit(levelData);
     }
 
-    public LevelData CreateLevel()
-    {
-        //Calculate how many beats in a song
-        trackBeatAmount = (int)(musicResource.length/60 * BPM);
 
-        LevelData levelData = levelDataHandler.CreateLevel();
-
-        return levelData;
-    }
 
     public void RequestLevelEdit(LevelData levelData)
     {
@@ -114,7 +115,6 @@ public class LevelEditor : MonoBehaviour
 
     private IEnumerator OnEditRequest(LevelData levelData)
     {
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         if(levelData == null)
         {
             //Instantiate level options if editor not opened via creation of a new level, yield WaitUntil one is chosen
@@ -193,6 +193,11 @@ public class LevelEditor : MonoBehaviour
             BPM = null;
             Debug.LogWarning("Incorrect type detected in BPM input field. Try again.");
         }
+    }
+
+    public void UpdateName()
+    {
+        levelName = nameInputField.text;
     }
 
     public void ClosePreviewWindow()
