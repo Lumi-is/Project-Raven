@@ -1,40 +1,47 @@
 using System.Collections;
+using System.IO;
 using UnityEngine;
 
 public class BeatManager : MonoBehaviour
 {
     [Header("Sound")]
-    public AudioSource musicSource;
+    [SerializeField] AudioSource musicSource;
     [SerializeField] AudioSource SFX;
-    [SerializeField] Spawner spawnerScript;
     
-    [Header("Public")]
+    [Header("Attributes")]
     [Tooltip("Whether or not player has done any action on the current beat.")]
     public int cooldownUntilNextAction;
 
-    [Header("Music attributes")]
-    public float BPM;
-
+    [Header("Music Attributes")]
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
     public float MaxOffset;
 
-    [Header("Read-only")]
-
+    [Header("Data")]
     [Tooltip("Boolean read by other scripts for checking whether the music is currently on beat and an action can be done.")]
     public bool OnBeat;
+    public string levelName;
+    public LevelData levelData;
+
+    [Header("Singleton scripts")]
+    [SerializeField] Spawner spawner;
+    [SerializeField] FileDataHandler dataHandler;
 
     //Private
+
+    readonly private float BPM;
     private float lastBeat;
     private float timeBetweenBeats;
-
     private float lastFrameMusicTime;
     private float currentFrameMusicTime;
 
     
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
+        string fullFilePath = Path.Combine(dataHandler.defaultFilePath,levelName,".json");
+        levelData = dataHandler.LoadFile<LevelData>(fullFilePath);
+
         lastBeat = 0;
         timeBetweenBeats = 60/BPM;
 
@@ -69,7 +76,7 @@ public class BeatManager : MonoBehaviour
 
         if(currentFrameMusicTime < lastFrameMusicTime)
         {
-            spawnerScript.beatCount = 0;
+            spawner.currentBeat = 0;
             beatTimerOffsetLimit = MaxOffset/2;
             lastBeat = 0;
             if(cooldownUntilNextAction != 0)
@@ -83,6 +90,7 @@ public class BeatManager : MonoBehaviour
 
     private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
     {
+        spawner.SpawnEnemies();
         OnBeat = false;
 
         yield return new WaitForSeconds(60/LocalBPM-offsetTime);

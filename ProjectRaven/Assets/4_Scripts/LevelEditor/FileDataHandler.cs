@@ -55,7 +55,7 @@ public class FileDataHandler : LevelEditor
         return beatMatrix;
     }
 
-    internal string defaultFilePath;
+    [SerializeField] internal string defaultFilePath = "Data/Levels";
 
     public LevelData CreateLevel()
     {
@@ -69,8 +69,7 @@ public class FileDataHandler : LevelEditor
         } else {
             _name = EditedLevelName + ".json";
         }
-        defaultFilePath = "/Data/Levels/";
-        string fullFilePath = Path.Combine(Application.persistentDataPath + defaultFilePath + _name);
+        string fullFilePath = Path.Combine(Application.persistentDataPath,defaultFilePath,_name);
 
         LevelData levelData = new()
         {
@@ -78,8 +77,6 @@ public class FileDataHandler : LevelEditor
             LevelIndex = levelInEdit,
             levelName = _name,
         };
-
-        IFileDataHandler fileDataHandler = new();
 
         SaveFile(levelData, fullFilePath);
 
@@ -140,13 +137,24 @@ public class FileDataHandler : LevelEditor
 
             return default;
         }
-        
+    }
+
+    public void DeleteFile(string fileName)
+    {
+        string _name = fileName + ".json";
+        string fullFilePath = Path.Combine(Application.persistentDataPath,defaultFilePath,_name);
+        try{
+            if(File.Exists(fullFilePath))
+            {
+                //Prompt for users to ask whether they are sure or not!
+                File.Delete(fullFilePath);
+            } else {
+                Debug.LogWarning("Data from path '"+fullFilePath+"' could not be found. Check the file name and try again.");
+            }
+        } catch (Exception e){
+            Debug.LogError("Failed to delete data '"+fullFilePath+"'. - Error at: "+e);
+        }
     }        
-}
-
-public class IFileDataHandler
-{
-
 }
 
 [Serializable]

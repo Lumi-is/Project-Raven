@@ -11,7 +11,6 @@ public class LevelEditor : MonoBehaviour
     public int? BPM = null;
 
     [Header("Data")]
-
     [Tooltip("List of level layouts for users to choose from.")]
     [SerializeField] protected LevelList levelList;
 
@@ -19,26 +18,21 @@ public class LevelEditor : MonoBehaviour
     [SerializeField] protected TMP_InputField nameInputField;
 
     //Name of the currently edited level. This is referenced in scripts, used in saving files and **should not be changed directly via files**.
-    protected string EditedLevelName;
-
-    protected LevelData levelData;
-
     [Tooltip("Index of a level in [levelList] that is currently being edited.")]
     public int levelInEdit;
-
     [Tooltip("Number of beats in the song which is being edited")]
     public int trackBeatAmount;
-
     [Tooltip("Maximum number of concurrent instantiated attacks per beat.")]
     public int maxAttackAmount = 1;
+    //Name of the level that is being edited (:O)
+    protected string EditedLevelName;
+    //levelData used to store data and then save it
+    protected LevelData levelData;
+
 
     //Make another method in spawner script to spawn enemies in a stationary mode.
 
     [Header("UI (BeatList)")]
-
-    [Tooltip("List of UI elements that represent [beatList]")]
-    [SerializeField] private List<Transform> UIBeatList;
-
     [Tooltip("Prefab for an empty node in the UI list")]
     [SerializeField] GameObject UIListNode; 
 
@@ -52,24 +46,18 @@ public class LevelEditor : MonoBehaviour
     [SerializeField] Transform UIListParent;
 
     [Header("UI (Scene preview)")]
-
     [Tooltip("Preview window for scene editing.")]
     [SerializeField] PreviewWindow previewWindow;
 
     [Header("UI (other)")]
-
     [Tooltip("User input field which will ask users for the song BPM")]
     [SerializeField] TMP_InputField BPMInputField; 
 
     [Tooltip("The object which will be enabled when showing users the option to either Create, edit or delete levels upon opening editor.")]
     [SerializeField] GameObject optionRootParent;
 
-
     [Header("Singleton scripts")]
-    [SerializeField] private Spawner spawnerScript;
     [SerializeField] private FileDataHandler levelDataHandler;
-
-
 
     // Awake is called once before the first execution of Update after the MonoBehaviour is created regardless of whether or not the instance is active
     void Awake()
@@ -78,9 +66,7 @@ public class LevelEditor : MonoBehaviour
         optionRootParent.SetActive(true);
     }
 
-
-
-    //Upon clicking "Create a new level" 
+//Level creation 
     public void RequestLevelCreation()
     {
         StartCoroutine(OnCreateRequest());
@@ -109,7 +95,7 @@ public class LevelEditor : MonoBehaviour
     }
 
 
-
+//Level editing
     public void RequestLevelEdit(LevelData levelData)
     {
         StartCoroutine(OnEditRequest(levelData));
@@ -123,7 +109,7 @@ public class LevelEditor : MonoBehaviour
             //TO BE CONTINUED
         } 
 
-        UIBeatList = InstantiateAttackArr();
+        InstantiateAttackArr();
 
         //Goes to OpenPreviewWindow method via UI element on click:
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
@@ -148,7 +134,20 @@ public class LevelEditor : MonoBehaviour
 
     }
 
-    public List<Transform> InstantiateAttackArr()
+//Level deletion
+    public void RequestLevelDeletion()
+    {
+        StartCoroutine(OnDeleteRequest());
+    }
+
+    private IEnumerator OnDeleteRequest()
+    {
+        EditedLevelName = null;
+        yield return new WaitUntil(()=> EditedLevelName != null);
+        levelDataHandler.DeleteFile(EditedLevelName);
+    }
+
+    public void InstantiateAttackArr()
     {
         //Create UI element for editing attackArray
         List<Transform> UIArrayNodeList = new();
@@ -165,8 +164,6 @@ public class LevelEditor : MonoBehaviour
             UIArrayNodeList.Add(node.transform);
         }
         UIListParent.gameObject.SetActive(true);
-
-        return UIArrayNodeList;
     }
 
     public void OpenPreviewWindow()
@@ -181,23 +178,6 @@ public class LevelEditor : MonoBehaviour
         previewWindow.Close();
         previewWindow.gameObject.SetActive(false);
         UIListParent.gameObject.SetActive(true);
-    }
-
-    private IEnumerator OnDeleteRequest()
-    {
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        //If pressed "Delete a level" 
-
-        //Instantiate a list of levels (exclude all levels which are tagged non-custom)
-        //Upon selecting a level to edit
-        //Delete level from levelList
-
-        //Go back to the three main options
-
-        return null;
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
     public void UpdateBPM()
