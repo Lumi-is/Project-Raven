@@ -83,7 +83,6 @@ public class BeatManager : MonoBehaviour
 
     private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
     {
-        spawnerScript.SpawnEnemies();
         OnBeat = false;
 
         yield return new WaitForSeconds(60/LocalBPM-offsetTime);

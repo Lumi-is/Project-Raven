@@ -3,28 +3,22 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public LevelDataHandler dataHandler;
+    public FileDataHandler dataHandler;
     public BeatManager beatManager;
-    public List<Enemy> enemyTypeList = new();
-
     public int beatCount;
+    public List<GameObject> attackerList; 
 
-    public void Awake()
+    public void SpawnEnemies(string levelName)
     {
-        beatCount = 0;
-    }
+        string fullFilePath = dataHandler.defaultFilePath+levelName;
+        var levelData = dataHandler.LoadFile<LevelData>(fullFilePath);
+        //Spawn enemies TO BE CONTINUED
 
-    public void SpawnEnemies()
-    {
         
     }
 
     public void SpawnEditorEnemies()
     {
         
-    }
-    public Enemy GetAttackType(int attackIndex)
-    {
-        return enemyTypeList[attackIndex];
     }
 }

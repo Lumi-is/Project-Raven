@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-public class LevelDataHandler : LevelEditor 
+public class FileDataHandler : LevelEditor
 {   
     public List<List<BeatData>> NewBeatList()
     {
@@ -45,49 +45,50 @@ public class LevelDataHandler : LevelEditor
         return newBeatData;
     }
 
+    public List<List<BeatData>> AppendListByY(List<List<BeatData>> beatMatrix)
+    {
+        for(int i = 0; i < beatMatrix.Count; i++)
+        {
+            beatMatrix[i].Add(NewBeatData(0,new Vector2(0,0)));
+        }
+
+        return beatMatrix;
+    }
+
+    internal string defaultFilePath;
+
     public LevelData CreateLevel()
     {
         trackBeatAmount = (int)(musicResource.length/60 * BPM);
         levelInEdit = levelList.levelDataList.Count;
 
+        string _name;
+        if(EditedLevelName.Equals("default"))
+        {
+            _name = "Level"+levelInEdit.ToString()+"Data.json";
+        } else {
+            _name = EditedLevelName + ".json";
+        }
+        defaultFilePath = "/Data/Levels/";
+        string fullFilePath = Path.Combine(Application.persistentDataPath + defaultFilePath + _name);
+
         LevelData levelData = new()
         {
             beatList = NewBeatList(),
-            LevelIndex = levelInEdit
+            LevelIndex = levelInEdit,
+            levelName = _name,
         };
 
-        FileDataHandler fileDataHandler = new();
+        IFileDataHandler fileDataHandler = new();
 
-        string name;
-        if(levelName.Equals("default"))
-        {
-            name = "Level"+levelInEdit.ToString()+"Data.json";
-        } else {
-            name = levelName + ".json";
-        }
-        string assetFilePath = "/Data/Levels/";
-        string fullFilePath = Path.Combine(Application.persistentDataPath + assetFilePath + name);
+        SaveFile(levelData, fullFilePath);
 
-        fileDataHandler.SaveFile(levelData, fullFilePath);
-
-        levelList.AddLevel(levelData);
-
-        return levelData;     
-    }    
-
-    public List<List<BeatData>> AppendListByY(List<List<BeatData>> beatList)
-    {
-        for(int i = 0; i < beatList.Count; i++)
-        {
-            beatList[i].Add(NewBeatData(0,new Vector2(0,0)));
-        }
-
-        return beatList;
+        return levelData;
     }
-}
+    
 
-public class FileDataHandler
-{
+    //File saving, loading, overwriting, deletion
+
     public void SaveFile<T>(T dataToStore, string fullFilePath)
     {
         try {
@@ -140,12 +141,18 @@ public class FileDataHandler
             return default;
         }
         
-    }
+    }        
+}
+
+public class IFileDataHandler
+{
+
 }
 
 [Serializable]
 public class LevelData
 {
+    public string levelName;
     public int LevelIndex;
     public List<List<BeatData>> beatList;
 }

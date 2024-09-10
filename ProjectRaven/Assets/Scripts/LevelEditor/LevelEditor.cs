@@ -19,9 +19,9 @@ public class LevelEditor : MonoBehaviour
     [SerializeField] protected TMP_InputField nameInputField;
 
     //Name of the currently edited level. This is referenced in scripts, used in saving files and **should not be changed directly via files**.
-    protected string levelName;
+    protected string EditedLevelName;
 
-    private LevelData levelData;
+    protected LevelData levelData;
 
     [Tooltip("Index of a level in [levelList] that is currently being edited.")]
     public int levelInEdit;
@@ -54,7 +54,7 @@ public class LevelEditor : MonoBehaviour
     [Header("UI (Scene preview)")]
 
     [Tooltip("Preview window for scene editing.")]
-    [SerializeField] GameObject ScenePreviewWindow;
+    [SerializeField] PreviewWindow previewWindow;
 
     [Header("UI (other)")]
 
@@ -67,7 +67,7 @@ public class LevelEditor : MonoBehaviour
 
     [Header("Singleton scripts")]
     [SerializeField] private Spawner spawnerScript;
-    [SerializeField] private LevelDataHandler levelDataHandler;
+    [SerializeField] private FileDataHandler levelDataHandler;
 
 
 
@@ -88,9 +88,9 @@ public class LevelEditor : MonoBehaviour
 
     private IEnumerator OnCreateRequest()
     {   
-        levelName = null; 
+        EditedLevelName = null; 
 
-        yield return new WaitUntil(()=> levelName != null);
+        yield return new WaitUntil(()=> EditedLevelName != null);
 
         nameInputField.gameObject.SetActive(false);
         BPMInputField.gameObject.SetActive(true);
@@ -102,6 +102,8 @@ public class LevelEditor : MonoBehaviour
 
         BPMInputField.gameObject.SetActive(false);
         levelData = levelDataHandler.CreateLevel();
+
+        levelList.AddLevel(levelData);
 
         RequestLevelEdit(levelData);
     }
@@ -155,7 +157,7 @@ public class LevelEditor : MonoBehaviour
         {
             Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
             var node = Instantiate(UIListNode, UIListPos + screenCenter + new Vector2(i*UIListElementOffset, 0), Quaternion.identity);
-            UIArrayNode nodeData = node.GetComponent<UIArrayNode>();
+            UIListNode nodeData = node.GetComponent<UIListNode>();
             nodeData.levelEditor = this;
             nodeData.indexTag = i;
 
@@ -165,6 +167,20 @@ public class LevelEditor : MonoBehaviour
         UIListParent.gameObject.SetActive(true);
 
         return UIArrayNodeList;
+    }
+
+    public void OpenPreviewWindow()
+    {
+        previewWindow.gameObject.SetActive(true);
+        UIListParent.gameObject.SetActive(false);
+        previewWindow.Open();
+    }
+
+    public void ClosePreviewWindow()
+    {
+        previewWindow.Close();
+        previewWindow.gameObject.SetActive(false);
+        UIListParent.gameObject.SetActive(true);
     }
 
     private IEnumerator OnDeleteRequest()
@@ -197,20 +213,14 @@ public class LevelEditor : MonoBehaviour
 
     public void UpdateName()
     {
-        levelName = nameInputField.text;
-    }
-
-    public void ClosePreviewWindow()
-    {
-        ScenePreviewWindow.SetActive(false);
-        UIListParent.gameObject.SetActive(true);
+        EditedLevelName = nameInputField.text;
     }
 
     public void GoBack()
     {
-        if(ScenePreviewWindow.activeSelf)
+        if(previewWindow.gameObject.activeSelf)
         {
-            ScenePreviewWindow.SetActive(false);
+            previewWindow.gameObject.SetActive(false);
             UIListParent.gameObject.SetActive(true);
             
         } else if(UIListParent.gameObject.activeSelf) {
@@ -220,7 +230,7 @@ public class LevelEditor : MonoBehaviour
             optionRootParent.SetActive(true);
         } else {
             optionRootParent.SetActive(true);
-            ScenePreviewWindow.SetActive(false);
+            previewWindow.gameObject.SetActive(false);
             UIListParent.gameObject.SetActive(false);
             DestroyUIArray();
             BPMInputField.gameObject.SetActive(false);
