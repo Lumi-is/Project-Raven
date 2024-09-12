@@ -55,8 +55,6 @@ public class FileDataHandler : LevelEditor
         return beatMatrix;
     }
 
-    [SerializeField] internal string defaultFilePath = "Data/Levels";
-
     public LevelData CreateLevel()
     {
         trackBeatAmount = (int)(musicResource.length/60 * BPM);
@@ -69,6 +67,7 @@ public class FileDataHandler : LevelEditor
         } else {
             _name = EditedLevelName + ".json";
         }
+
         string fullFilePath = Path.Combine(Application.persistentDataPath,defaultFilePath,_name);
 
         LevelData levelData = new()
@@ -82,7 +81,6 @@ public class FileDataHandler : LevelEditor
 
         return levelData;
     }
-    
 
     //File saving, loading, overwriting, deletion
 
@@ -98,6 +96,8 @@ public class FileDataHandler : LevelEditor
         } catch (Exception e) {
             Debug.LogError("Error occured when trying to save data to file: '" + fullFilePath + "' - Error at: " + e);
         }
+
+        CheckForDirectoryChanges();
     }
 
     private void CreateFile<T> (T dataToStore, string fullFilePath)
@@ -109,10 +109,11 @@ public class FileDataHandler : LevelEditor
             using FileStream stream = new(fullFilePath, FileMode.Create);
             using StreamWriter writer = new(stream);
             writer.Write(jsonData);
+
+            Debug.Log("Succesfully saved data to '"+fullFilePath+"'! Starting level edit mode...");
         } catch (Exception e) {
             Debug.LogError("Failed to create file '"+ fullFilePath + "' - Error at: " + e);
         }
-        
     }
 
     private void OverwriteFile<T> (T dataToStore, string fullFilePath)
@@ -153,6 +154,53 @@ public class FileDataHandler : LevelEditor
             }
         } catch (Exception e){
             Debug.LogError("Failed to delete data '"+fullFilePath+"'. - Error at: "+e);
+        }
+
+        CheckForDirectoryChanges();
+    }
+
+    public void CheckForDirectoryChanges()
+    {
+        //File path to directory (/data/levels/)
+        string fullFilePath = Path.Combine(Application.persistentDataPath, defaultFilePath, "*.json");
+        string[] fileArray = Directory.GetFiles(Path.GetDirectoryName(fullFilePath));
+
+        if(fileArray.Length > 0)
+        {
+            Debug.Log("All files in level folder are listed below - Starting check for matching list in program...");
+            foreach(string s in fileArray)
+            {
+                Debug.Log("File:"+s);
+            }
+        } else {
+            Debug.Log("No level files found in the directory. Create a level to get started.");
+        }
+
+        if(fileArray.Length > levelList.levelDataList.Count)
+        {
+            for(int i = 0; i < fileArray.Length; i++)
+            {
+                fullFilePath = Path.Combine(Application.persistentDataPath,defaultFilePath, fileArray[i]);
+
+                if(!File.Exists(fullFilePath)) return;
+                
+                if(levelList.levelDataList.Contains(LoadFile<LevelData>(fullFilePath))) return; 
+
+                //else
+                levelList.levelDataList.Add(LoadFile<LevelData>(fullFilePath));
+            }
+        }
+
+        for(int i = 0; i < levelList.levelDataList.Count;)
+        {
+            fullFilePath = Path.Combine(Application.persistentDataPath,defaultFilePath, levelList.levelDataList[i].levelName);
+            if(File.Exists(Path.Combine(fullFilePath)))
+            {
+                i++;
+            } else {
+                levelList.levelDataList.RemoveAt(i);
+                i++;
+            }
         }
     }        
 }

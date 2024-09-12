@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 public class LevelEditor : MonoBehaviour
 {
@@ -14,8 +16,11 @@ public class LevelEditor : MonoBehaviour
     [Tooltip("List of level layouts for users to choose from.")]
     [SerializeField] protected LevelList levelList;
 
-    [Tooltip("Input field for users to put the desired level name to.")]
-    [SerializeField] protected TMP_InputField nameInputField;
+    [Tooltip("Input field for users to put the desired level name to when creating a level.")]
+    [SerializeField] protected TMP_InputField creationNameInput;
+
+    [Tooltip("Input field for users to put the desired level name to when deleting a level.")]
+    [SerializeField] protected TMP_InputField deletionNameInput;
 
     //Name of the currently edited level. This is referenced in scripts, used in saving files and **should not be changed directly via files**.
     [Tooltip("Index of a level in [levelList] that is currently being edited.")]
@@ -54,16 +59,26 @@ public class LevelEditor : MonoBehaviour
     [SerializeField] TMP_InputField BPMInputField; 
 
     [Tooltip("The object which will be enabled when showing users the option to either Create, edit or delete levels upon opening editor.")]
-    [SerializeField] GameObject optionRootParent;
+    [SerializeField] Transform optionRootParent;
 
     [Header("Singleton scripts")]
-    [SerializeField] private FileDataHandler levelDataHandler;
+    [SerializeField] private FileDataHandler dataHandler;
+
+    [HideInInspector]
+    public string defaultFilePath; 
 
     // Awake is called once before the first execution of Update after the MonoBehaviour is created regardless of whether or not the instance is active
     void Awake()
     {
         //Give users three options: "Create new level", "Edit a level", "Delete a level"
-        optionRootParent.SetActive(true);
+        optionRootParent.gameObject.SetActive(true);
+
+        defaultFilePath = Path.Combine("Data","Levels");
+    }
+
+    void Start()
+    {
+        dataHandler.CheckForDirectoryChanges();
     }
 
 //Level creation 
@@ -74,22 +89,21 @@ public class LevelEditor : MonoBehaviour
 
     private IEnumerator OnCreateRequest()
     {   
+        // Wait until user has put in a level name
+        // UpdateName updates editedLevelName value
         EditedLevelName = null; 
-
         yield return new WaitUntil(()=> EditedLevelName != null);
+        creationNameInput.gameObject.SetActive(false);
 
-        nameInputField.gameObject.SetActive(false);
         BPMInputField.gameObject.SetActive(true);
 
         BPM = null;
         //  Wait until user has put in a possible BPM and then continue. 
         //  UpdateBPM updates BPM value and checks whether or not what users put into the input field can be used as an integer. Decimal BPM values are not supported. 
         yield return new WaitUntil(()=> BPM != null);
-
         BPMInputField.gameObject.SetActive(false);
-        levelData = levelDataHandler.CreateLevel();
 
-        levelList.AddLevel(levelData);
+        levelData = dataHandler.CreateLevel();
 
         RequestLevelEdit(levelData);
     }
@@ -142,14 +156,26 @@ public class LevelEditor : MonoBehaviour
 
     private IEnumerator OnDeleteRequest()
     {
+        // Wait until user has put in a level name
+        // UpdateName updates editedLevelName value
         EditedLevelName = null;
         yield return new WaitUntil(()=> EditedLevelName != null);
-        levelDataHandler.DeleteFile(EditedLevelName);
+        deletionNameInput.gameObject.SetActive(false);
+
+        dataHandler.DeleteFile(EditedLevelName);
+    }
+
+    public void RequestReload()
+    {
+        dataHandler.CheckForDirectoryChanges();
     }
 
     public void InstantiateAttackArr()
     {
-        //Create UI element for editing attackArray
+        //Delete possible previous lists
+        DestroyUIList();
+
+        //Create UI element for editing beatMatrix
         List<Transform> UIArrayNodeList = new();
 
         for(int i = 0; i < trackBeatAmount; i++)
@@ -193,35 +219,42 @@ public class LevelEditor : MonoBehaviour
 
     public void UpdateName()
     {
-        EditedLevelName = nameInputField.text;
-    }
-
-    public void GoBack()
-    {
-        if(previewWindow.gameObject.activeSelf)
+        if(creationNameInput.gameObject.activeSelf)
         {
-            previewWindow.gameObject.SetActive(false);
-            UIListParent.gameObject.SetActive(true);
-            
-        } else if(UIListParent.gameObject.activeSelf) {
-
-            UIListParent.gameObject.SetActive(false);
-            DestroyUIArray();
-            optionRootParent.SetActive(true);
+            EditedLevelName = creationNameInput.text;
+        } else if (deletionNameInput.gameObject.activeSelf) {
+            EditedLevelName = deletionNameInput.text;
         } else {
-            optionRootParent.SetActive(true);
-            previewWindow.gameObject.SetActive(false);
-            UIListParent.gameObject.SetActive(false);
-            DestroyUIArray();
-            BPMInputField.gameObject.SetActive(false);
+            GoBack();
         }
+        
     }
 
-    public void DestroyUIArray()
+    public void DestroyUIList()
     {
         foreach(Transform child in UIListParent)
         {
             Destroy(child.gameObject);
+        }
+    }
+
+    public void GoBack()
+    {
+        StopAllCoroutines();
+
+        if(previewWindow.gameObject.activeSelf)
+        {
+            previewWindow.Close();
+            previewWindow.gameObject.SetActive(false);
+
+            UIListParent.gameObject.SetActive(true);
+        } else {
+            UIListParent.gameObject.SetActive(false);
+            creationNameInput.gameObject.SetActive(false);
+            deletionNameInput.gameObject.SetActive(false);
+            BPMInputField.gameObject.SetActive(false);
+
+            optionRootParent.gameObject.SetActive(true);
         }
     }
 }
