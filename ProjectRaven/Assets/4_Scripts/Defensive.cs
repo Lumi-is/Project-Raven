@@ -20,7 +20,7 @@ public class Defensive : MonoBehaviour
         }
     }
 
-    public void PlayerDamage(float takenDamageAmount)
+    public void TakeDamage(float takenDamageAmount)
     {
         
     }

@@ -37,12 +37,14 @@ public class LevelEditor : MonoBehaviour
 
     //Make another method in spawner script to spawn enemies in a stationary mode.
 
+    [Header("UI (General)")]
+    [Range(0,1000)]
+    [Tooltip("How much each array node is offset from each other in the editor UI (pixels)")]
+    [SerializeField] int UIListElementOffset;
+
     [Header("UI (BeatList)")]
     [Tooltip("Prefab for an empty node in the UI list")]
     [SerializeField] GameObject UIListNode; 
-
-    [Tooltip("How much each array node is offset from each other in the editor UI.")]
-    [SerializeField] int UIListElementOffset;
 
     [Tooltip("Position where the UI array starts from.")]
     [SerializeField] Vector2 UIListPos;
@@ -53,6 +55,21 @@ public class LevelEditor : MonoBehaviour
     [Header("UI (Scene preview)")]
     [Tooltip("Preview window for scene editing.")]
     [SerializeField] PreviewWindow previewWindow;
+
+
+    [Tooltip("List of all the different possible bullets.")]
+    [SerializeField] List<GameObject> bulletList = new();
+
+    [Tooltip("Node prefab which will be instantiated in editor.")]
+    [SerializeField] GameObject bulletListNode;
+
+    [Tooltip("Where the bullet list will start on screen. Additive to screenCenter.")]
+    [SerializeField] Vector2 bulletListPos;
+
+    [Tooltip("Parent under which the bulletListNodes should be instantiated")]
+    [SerializeField] Transform bulletListParent;
+
+
 
     [Header("UI (other)")]
     [Tooltip("User input field which will ask users for the song BPM")]
@@ -124,6 +141,7 @@ public class LevelEditor : MonoBehaviour
         } 
 
         InstantiateAttackArr();
+        UIListParent.gameObject.SetActive(true);
 
         //Goes to OpenPreviewWindow method via UI element on click:
         //Upon user pressing one of the buttons instantiated, get index data from button and get correct data from matching index according to it from LevelData attackArray
@@ -173,10 +191,10 @@ public class LevelEditor : MonoBehaviour
     public void InstantiateAttackArr()
     {
         //Delete possible previous lists
-        DestroyUIList();
+        DestroyUIList(UIListParent);
 
         //Create UI element for editing beatMatrix
-        List<Transform> UIArrayNodeList = new();
+        List<Transform> UINodePosList = new();
 
         for(int i = 0; i < trackBeatAmount; i++)
         {
@@ -187,21 +205,44 @@ public class LevelEditor : MonoBehaviour
             nodeData.indexTag = i;
 
             node.transform.SetParent(UIListParent);
-            UIArrayNodeList.Add(node.transform);
+            UINodePosList.Add(node.transform);
         }
-        UIListParent.gameObject.SetActive(true);
+    }
+
+    public void InstantiateBulletTypes()
+    {
+        DestroyUIList(bulletListParent);
+
+        List<Transform> UINodePosList = new();
+
+        for(int i = 0; i < bulletList.Count; i++)
+        {
+            Vector2 screenCenter = new(Screen.width/2,Screen.height/2);
+            var node = Instantiate(bulletListNode, bulletListPos + screenCenter + new Vector2(0,i*UIListElementOffset),Quaternion.identity);
+            UIBulletNode nodeData = node.GetComponent<UIBulletNode>();
+            nodeData.levelEditor = this;
+            nodeData.indexTag = i;
+
+            node.transform.SetParent(bulletListParent);
+            UINodePosList.Add(node.transform);
+        }
     }
 
     public void OpenPreviewWindow()
     {
-        previewWindow.gameObject.SetActive(true);
         UIListParent.gameObject.SetActive(false);
+
         previewWindow.Open();
+        InstantiateBulletTypes();
+
+        bulletListParent.gameObject.SetActive(true);
+        previewWindow.gameObject.SetActive(true);
     }
 
     public void ClosePreviewWindow()
     {
         previewWindow.Close();
+
         previewWindow.gameObject.SetActive(false);
         UIListParent.gameObject.SetActive(true);
     }
@@ -230,9 +271,9 @@ public class LevelEditor : MonoBehaviour
         
     }
 
-    public void DestroyUIList()
+    public void DestroyUIList(Transform parent)
     {
-        foreach(Transform child in UIListParent)
+        foreach(Transform child in parent)
         {
             Destroy(child.gameObject);
         }

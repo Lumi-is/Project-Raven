@@ -1,10 +1,19 @@
 using UnityEngine;
 
-public class Attacker : MonoBehaviour
+public class BasicLinearBullet : MonoBehaviour
 {
-    public BulletPreset bulletStatistics;
+    public BulletStats bulletStatistics;
+
+    public bool shootAtPlayer;
 
     GameObject bulletObject;
+
+    [SerializeField] GameObject model;
+
+    [SerializeField] float speed;
+
+    [SerializeField] Vector3 targetPos;
+
 
     public bool isInEditor;
     
@@ -13,34 +22,42 @@ public class Attacker : MonoBehaviour
     {
         if(isInEditor) return;
         
-        GameObject model = bulletStatistics.model;
         bulletObject = Instantiate(model, transform.position, transform.rotation);
         bulletObject.transform.localScale = bulletObject.transform.localScale * bulletStatistics.size;
 
-        Bullet bullet = bulletObject.GetComponent<Bullet>();
         Rigidbody rb = bulletObject.GetComponent<Rigidbody>();
 
         //Custom shader and color
 
         Transform player = FindAnyObjectByType<Defensive>().transform;
 
-        if(bulletStatistics.shootAtPlayer)
+        if(shootAtPlayer)
         {
             Vector3 bulletShootDirection = player.position - transform.position;
 
-            bulletShootDirection = bulletStatistics.speed * bulletShootDirection;
+            bulletShootDirection = speed * bulletShootDirection;
             rb.linearVelocity = new Vector3(bulletShootDirection.x, transform.position.y, bulletShootDirection.z);
         } else {
-            Vector3 bulletShootDirection = bulletStatistics.EndPosition - transform.position;
+            Vector3 bulletShootDirection = targetPos - transform.position;
 
-            bulletShootDirection = bulletStatistics.speed * bulletShootDirection;
+            bulletShootDirection = speed * bulletShootDirection;
             rb.linearVelocity = new Vector3(bulletShootDirection.x, transform.position.y, bulletShootDirection.z);
         }
 
-        bullet.damage = bulletStatistics.damage;
-
         Invoke(nameof(KillBullet),bulletStatistics.lifeTime);
     }
+
+    
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.GetComponent<Defensive>() != null)
+        {
+            Defensive playerScript = other.gameObject.GetComponent<Defensive>();
+            playerScript.TakeDamage(bulletStatistics.dmg);
+        }
+    }
+
     void KillBullet()
     {
         Destroy(bulletObject);

@@ -149,6 +149,7 @@ Transform:
   m_Children:
   - {fileID: 643289623}
   - {fileID: 762065851}
+  - {fileID: 1485753792}
   m_Father: {fileID: 769745853}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &104139786
@@ -1020,7 +1021,7 @@ GameObject:
   m_Component:
   - component: {fileID: 643289623}
   m_Layer: 5
-  m_Name: UIListParent
+  m_Name: UIList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1291,6 +1292,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e525b655bc8c96b49bd1b385b3d29729, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  musicResource: {fileID: 0}
+  levelList: {fileID: 0}
+  creationNameInput: {fileID: 0}
+  deletionNameInput: {fileID: 0}
+  levelInEdit: 0
+  trackBeatAmount: 0
+  maxAttackAmount: 1
+  UIListElementOffset: 0
+  UIListNode: {fileID: 0}
+  UIListPos: {x: 0, y: 0}
+  UIListParent: {fileID: 0}
+  previewWindow: {fileID: 0}
+  bulletList: []
+  bulletListNode: {fileID: 0}
+  bulletListPos: {x: 0, y: 0}
+  bulletListParent: {fileID: 0}
+  BPMInputField: {fileID: 0}
+  optionRootParent: {fileID: 0}
+  dataHandler: {fileID: 0}
+  defaultFilePath: 
 --- !u!1 &765303541
 GameObject:
   m_ObjectHideFlags: 0
@@ -2385,11 +2406,17 @@ MonoBehaviour:
   levelInEdit: 0
   trackBeatAmount: 0
   maxAttackAmount: 1
+  UIListElementOffset: 500
   UIListNode: {fileID: 8280640685880640771, guid: acfa0e8801c0ac64aa07cdaa24032aa0, type: 3}
-  UIListElementOffset: 250
   UIListPos: {x: 0, y: 0}
   UIListParent: {fileID: 643289623}
   previewWindow: {fileID: 762065854}
+  bulletList:
+  - {fileID: 2842578946796855437, guid: 0f6706d34dad4244d948148e5ff7d10e, type: 3}
+  - {fileID: 4267828427230163997, guid: 6e5c3d122b7539a47943285d2d3ed52f, type: 3}
+  bulletListNode: {fileID: 8280640685880640771, guid: 6e10113b1ee1d6a4f9b8a243e1fd711c, type: 3}
+  bulletListPos: {x: 0, y: 0}
+  bulletListParent: {fileID: 1485753792}
   BPMInputField: {fileID: 1389109052}
   optionRootParent: {fileID: 867280250}
   dataHandler: {fileID: 1210562686}
@@ -3026,6 +3053,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1427077970}
   m_CullTransparentMesh: 1
+--- !u!1 &1485753791
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1485753792}
+  m_Layer: 0
+  m_Name: BulletList
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1485753792
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1485753791}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 57258225}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1507732200
 GameObject:
   m_ObjectHideFlags: 0
