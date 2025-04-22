@@ -6,15 +6,13 @@ using UnityEngine.InputSystem;
 public class Movement : MonoBehaviour
 {
     [Header("Inputs")]
-    [SerializeField] InputSystem_Actions playerInputs;
 
     private InputAction move;
     private InputAction dash;
 
 
-    [Header("Physics")]
-    [SerializeField] Rigidbody rb;
-
+    [Header("Transform")]
+    public Transform playerTransform;
     Vector3 ProcessedDirection;
 
 
@@ -44,8 +42,8 @@ public class Movement : MonoBehaviour
 
     void OnEnable()
     {
-        move = playerInputs.Player.Move;
-        dash = playerInputs.Player.Dash;
+        move = InputSystem.actions.FindAction("Move");
+        dash = InputSystem.actions.FindAction("Dash");
         move.Enable();
         dash.Enable();
     }
@@ -59,7 +57,6 @@ public class Movement : MonoBehaviour
     void Awake()
     {
         DOTween.Init();
-        playerInputs = new InputSystem_Actions();
     }
 
     //Direction where player character looks if no actions are pressed 
@@ -76,7 +73,7 @@ public class Movement : MonoBehaviour
 
         if(!isDashing)
         {
-            rb.linearVelocity = new Vector3(speed * ProcessedDirection.x, rb.linearVelocity.y, speed * ProcessedDirection.z);
+            playerTransform.position += new Vector3(speed * ProcessedDirection.x * Time.deltaTime, 0, speed * ProcessedDirection.z * Time.deltaTime);
 
             if(!attackScript.isInAttackRange)
             {  
@@ -117,8 +114,7 @@ public class Movement : MonoBehaviour
         isDashing = true;
         var DashDir = ProcessedDirection; 
 
-
-        rb.DOMove(transform.position + DashDir * dashForce, dashDuration);
+        playerTransform.DOMove(transform.position + DashDir * dashForce, dashDuration);
 
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
