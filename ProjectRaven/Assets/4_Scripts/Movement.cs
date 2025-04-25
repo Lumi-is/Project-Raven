@@ -102,19 +102,18 @@ public class Movement : MonoBehaviour
         {
             if(beatManager.OnBeat && !isDashOnCoolDown && beatManager.cooldownUntilNextAction == 0)
             {
-                beatManager.cooldownUntilNextAction = 1;
                 isDashOnCoolDown = true;
+                isDashing = true;
+                beatManager.cooldownUntilNextAction = 1;
                 StartCoroutine(Dashing());
             } else {
                 //Incorrect sound
-            }
-            
+            }  
         }
     }
 
     IEnumerator Dashing()
     {
-        isDashing = true;
         var DashDir = ProcessedDirection; 
 
 

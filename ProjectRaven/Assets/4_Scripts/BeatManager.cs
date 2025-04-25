@@ -20,11 +20,6 @@ public class BeatManager : MonoBehaviour
     [Tooltip("Boolean read by other scripts for checking whether the music is currently on beat and an action can be done.")]
     public bool OnBeat;
     public string levelName;
-    public LevelData levelData;
-
-    [Header("Singleton scripts")]
-    [SerializeField] Spawner spawner;
-    [SerializeField] FileDataHandler dataHandler;
 
     //Private
 
@@ -39,9 +34,6 @@ public class BeatManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        string fullFilePath = Path.Combine(dataHandler.defaultFilePath,levelName,".json");
-        levelData = dataHandler.LoadFile<LevelData>(fullFilePath);
-
         lastBeat = 0;
         timeBetweenBeats = 60/BPM;
 
@@ -76,7 +68,7 @@ public class BeatManager : MonoBehaviour
 
         if(currentFrameMusicTime < lastFrameMusicTime)
         {
-            spawner.currentBeat = 0;
+            //spawner.currentBeat = 0; // WIP
             beatTimerOffsetLimit = MaxOffset/2;
             lastBeat = 0;
             if(cooldownUntilNextAction != 0)
@@ -90,7 +82,7 @@ public class BeatManager : MonoBehaviour
 
     private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
     {
-        spawner.SpawnEnemies();
+        //spawner.SpawnEnemies(); // WIP
         OnBeat = false;
 
         yield return new WaitForSeconds(60/LocalBPM-offsetTime);

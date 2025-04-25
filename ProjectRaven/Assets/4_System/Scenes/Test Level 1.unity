@@ -42,7 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -147,7 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b7c21d5ca548145b9fa1d82afd0580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 4267828427230163997, guid: 6e5c3d122b7539a47943285d2d3ed52f, type: 3}
 --- !u!4 &50254323
 Transform:
   m_ObjectHideFlags: 0
@@ -204,7 +204,6 @@ GameObject:
   m_Component:
   - component: {fileID: 205331604}
   - component: {fileID: 205331610}
-  - component: {fileID: 205331609}
   - component: {fileID: 205331606}
   - component: {fileID: 205331607}
   - component: {fileID: 205331608}
@@ -244,11 +243,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSource: {fileID: 205331607}
   SFX: {fileID: 205331608}
-  spawnerScript: {fileID: 205331610}
   cooldownUntilNextAction: 0
-  BPM: 200
   MaxOffset: 0.5
   OnBeat: 1
+  levelName: 
+  levelData:
+    levelName: 
+    LevelIndex: 0
+  spawner: {fileID: 205331610}
+  dataHandler: {fileID: 0}
 --- !u!82 &205331607
 AudioSource:
   m_ObjectHideFlags: 0
@@ -443,25 +446,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &205331609
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 205331601}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eca7c05ef6fb9194d964e139d80c3d09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  musicResource: {fileID: 0}
-  BPM: 0
-  levelList: {fileID: 0}
-  UIArrayNodePrefab: {fileID: 0}
-  UIListElementOffset: 0
-  defaultUISpawnPosition: {x: 0, y: 0}
-  trackBeatAmount: 0
 --- !u!114 &205331610
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,12 +458,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0374b15e7482d147a152769b275a2e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelData: {fileID: 205331609}
+  currentBeat: 0
+  attackerList: []
+  dataHandler: {fileID: 0}
   beatManager: {fileID: 205331606}
-  enemyTypeList:
-  - {fileID: 1628904205}
-  - {fileID: 50254322}
-  beatCount: 0
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1172,6 +1154,7 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!114 &524421471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1444,7 +1427,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b7c21d5ca548145b9fa1d82afd0580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 2842578946796855437, guid: 0f6706d34dad4244d948148e5ff7d10e, type: 3}
 --- !u!4 &1628904206
 Transform:
   m_ObjectHideFlags: 0
