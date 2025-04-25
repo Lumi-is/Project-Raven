@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class LevelDataHandler : PhaseDataHandler
+public class LevelDataHandler : PhaseDataHandler, IDataHandler
 {
     //Creation of a blank level
     public void CreateLevel(string levelName, List<AudioClip> phaseSongList, List<string> phaseNameList, string defaultFilePath, float BPM)
@@ -41,4 +41,18 @@ public class LevelDataHandler : PhaseDataHandler
         }
         //_________________________________________________________________________________
     }
+
+
+
+    //_________________________________________________________________________________
+    public void DeleteLevel(string levelName, string defaultFilePath)
+    {
+        if(Directory.Exists(Path.Combine(defaultFilePath, levelName)))
+        {
+            Directory.Delete(defaultFilePath, true);
+        } else {
+            Debug.Log("File not found!");
+        }
+    }
+    //_________________________________________________________________________________
 }
