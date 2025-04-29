@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5106050847837242372}
   - component: {fileID: 6278947461307157673}
   - component: {fileID: -3013348832661052524}
-  - component: {fileID: -7161906635416545581}
+  - component: {fileID: -1412030182020101596}
   m_Layer: 0
   m_Name: BasicBullet
   m_TagString: Untagged
@@ -137,7 +137,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &-7161906635416545581
+--- !u!114 &-1412030182020101596
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,7 +146,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 4228520794734336921}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bbfccc8a767d4d44b1adfa58792dd39, type: 3}
+  m_Script: {fileID: 11500000, guid: 285c112f70afd884f83e028606607ee3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 0
+  bulletStatistics: {fileID: 11400000, guid: ee81861bb4bdb434a891e7abd41ca4b0, type: 2}
+  shootAtPlayer: 1
+  model: {fileID: 4228520794734336921}
+  speed: 2
+  targetPos: {x: 0, y: 0, z: 0}
+  isInEditor: 0
