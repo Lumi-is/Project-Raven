@@ -1120,7 +1120,7 @@ MonoBehaviour:
   attackScript: {fileID: 1351170536}
   orientation: {fileID: 1419763319}
   gazeFollowedAttackable: {fileID: 0}
-  rotationSpeed: 30
+  rotationSpeed: 500
 --- !u!1 &1419763318
 GameObject:
   m_ObjectHideFlags: 0
