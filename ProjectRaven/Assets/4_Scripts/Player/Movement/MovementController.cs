@@ -73,15 +73,10 @@ public class MovementController : MonoBehaviour
             } else {
                 orientation.LookAt(gazeFollowedAttackable.position);
             }
+        } else {
+            orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
 
-        var step = rotationSpeed * Time.deltaTime;
-        transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
-    }
-
-    public void Dash()
-    {
-        
         if(playerManager.OnBeat && dash.IsPressed() && !isDashOnCoolDown && playerManager.cooldownUntilNextAction == 0)
         {
             isDashOnCoolDown = true;
@@ -90,7 +85,11 @@ public class MovementController : MonoBehaviour
             StartCoroutine(Dashing());
         } else {
             //Incorrect sound
-        }  
+        } 
+
+        var step = rotationSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
+ 
     }
     
 
@@ -99,7 +98,6 @@ public class MovementController : MonoBehaviour
         var DashDir = ProcessedDirection; 
 
         playerTransform.DOMove(transform.position + DashDir * dashForce, dashDuration);
-
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
 

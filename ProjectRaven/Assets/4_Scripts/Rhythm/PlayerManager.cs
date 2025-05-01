@@ -208,11 +208,19 @@ public class PlayerManager : MonoBehaviour
         currentBeat = 0;
         currentPhaseMusicPlayer.Stop();
         currentPhaseMusicPlayer.Play();
+        currentPhaseMusicPlayer.time = (float)GetCorrectAudioStartTime();
         currentSpawnableList = currentPhaseData.beatMatrix[currentBeat]; 
         SpawnEnemies();
         currentBeat++;
     }
     //_________________________________________________________________________________
+
+
+    private double GetCorrectAudioStartTime()
+    {
+        double correctAudioStartTime = currentPhaseMusicPlayer.clip.length - Math.Round(currentPhaseMusicPlayer.clip.length);
+        return correctAudioStartTime;
+    }
 
 
 

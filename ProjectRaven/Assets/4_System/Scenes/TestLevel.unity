@@ -465,7 +465,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.15
   far clip plane: 1000
   field of view: 60
   orthographic: 1
@@ -1113,9 +1113,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 1351170535}
   speed: 10
-  dashForce: 10
-  dashDuration: 1
-  dashCooldownAmount: 1
+  dashForce: 5
+  dashDuration: 0.2
+  dashCooldownAmount: 0
   playerManager: {fileID: 864241196}
   attackScript: {fileID: 1351170536}
   orientation: {fileID: 1419763319}
