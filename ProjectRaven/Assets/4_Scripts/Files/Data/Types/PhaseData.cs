@@ -14,31 +14,47 @@ public class PhaseData
     public List<List<BeatData>> beatMatrix;
 
     // For checking if condition for phase transition to next is met
-    public bool phaseChangeConditionMet;
+    public string PhaseChangeConditionType = "BossHPPhasePercentage"; //Accepted values: BossHPPercentage, BossHPPhasePercentage, Timer
 
     // Constructors
-    public PhaseData(string phaseName, List<List<BeatData>> beatDataArray, float BPM)
+
+    public PhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string PhaseChangeConditionType)
     {
         this.phaseName = phaseName;
-        this.beatMatrix = beatDataArray;
+        this.beatMatrix = beatMatrix;
         this.BPM = BPM;
+        this.PhaseChangeConditionType = PhaseChangeConditionType;        
+    }
+
+    public PhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM)
+    {
+        this.phaseName = phaseName;
+        this.beatMatrix = beatMatrix;
+        this.BPM = BPM;
+        PhaseChangeConditionType = "BossHPPhasePercentage";
     }
 
     public PhaseData(string phaseName, List<List<BeatData>> beatDataArray)
     {
         this.phaseName = phaseName;
         beatMatrix = beatDataArray;
+        BPM = 0;
+        PhaseChangeConditionType = "BossHPPhasePercentage";
     }
 
     public PhaseData(string phaseName)
     {
         this.phaseName = phaseName;
         beatMatrix = new();
+        BPM = 0;
+        PhaseChangeConditionType = "BossHPPhasePercentage";
     }
 
     public PhaseData()
     {
-        phaseName = "";
+        phaseName = "default";
         beatMatrix = new();
+        BPM = 0;
+        PhaseChangeConditionType = "BossHPPhasePercentage";
     }
 }
