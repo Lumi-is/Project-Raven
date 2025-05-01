@@ -13,12 +13,12 @@ public class LevelEditor : MonoBehaviour
     [Header("Song information")]
 
     [SerializeField] List<AudioClip> phaseSongList;
-    [SerializeField] float BPM;
+    [SerializeField] float defaultBPM;
 
     void Awake()
     {
         //Debugging and testing ONLY
-        //LevelDataHandler.DeleteLevel(levelName);
-        //LevelDataHandler.CreateLevel(phaseSongList, phaseNameList, levelName, BPM);
+        LevelDataHandler.DeleteLevel(levelName);
+        LevelDataHandler.CreateLevel(phaseSongList, phaseNameList, levelName, defaultBPM);
     }
 }

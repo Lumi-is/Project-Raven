@@ -1,7 +1,7 @@
-using UnityEngine;
 using Tools;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using UnityEngine;
+using OggVorbis;
 
 namespace System.IO.DataHandling{
     public  class PhaseDataHandler
@@ -19,10 +19,16 @@ namespace System.IO.DataHandling{
         //_________________________________________________________________________________
         public static PhaseData LoadPhase(string filePath)
         {
-            PhaseData loadedData = JsonConverter.FromJson<PhaseData>(filePath);
-            return loadedData;
+            PhaseData loadedPhase = JsonConverter.FromJson<PhaseData>(filePath);
+            return loadedPhase;
         }
         //_________________________________________________________________________________
+
+        public static AudioClip LoadPhaseAudio(string filePath)
+        {
+            AudioClip loadedAudio = VorbisPlugin.Load(filePath);
+            return loadedAudio;
+        }
 
 
 

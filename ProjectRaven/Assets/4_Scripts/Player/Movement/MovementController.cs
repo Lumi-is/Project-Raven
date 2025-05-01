@@ -27,7 +27,7 @@ public class MovementController : MonoBehaviour
     private bool isDashOnCoolDown;
 
     [Header("Rhythm")]
-    [SerializeField] BeatManager beatManager;
+    [SerializeField] PlayerManager playerManager;
 
     [Header("Turning")]
     [SerializeField] AttackManager attackScript;
@@ -38,24 +38,10 @@ public class MovementController : MonoBehaviour
     [Tooltip("The speed at which player rotates towards a given point.")]
     [SerializeField] float rotationSpeed;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
-    void OnEnable()
+    void Awake()
     {
         move = InputSystem.actions.FindAction("Move");
         dash = InputSystem.actions.FindAction("Dash");
-        move.Enable();
-        dash.Enable();
-    }
-
-    void OnDisable()
-    {
-        move.Disable();
-        dash.Disable();
-    }
-
-    void Awake()
-    {
         DOTween.Init();
     }
 
@@ -87,34 +73,31 @@ public class MovementController : MonoBehaviour
             } else {
                 orientation.LookAt(gazeFollowedAttackable.position);
             }
+        } else {
+            orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
+
+        if(playerManager.OnBeat && dash.IsPressed() && !isDashOnCoolDown && playerManager.cooldownUntilNextAction == 0)
+        {
+            isDashOnCoolDown = true;
+            isDashing = true;
+            playerManager.cooldownUntilNextAction = 1;
+            StartCoroutine(Dashing());
+        } else {
+            //Incorrect sound
+        } 
 
         var step = rotationSpeed * Time.deltaTime;
         transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
+ 
     }
-
-    public void Dash(InputAction.CallbackContext context)
-    {
-        if(context.started)
-        {
-            if(beatManager.OnBeat && !isDashOnCoolDown && beatManager.cooldownUntilNextAction == 0)
-            {
-                isDashOnCoolDown = true;
-                isDashing = true;
-                beatManager.cooldownUntilNextAction = 1;
-                StartCoroutine(Dashing());
-            } else {
-                //Incorrect sound
-            }  
-        }
-    }
+    
 
     IEnumerator Dashing()
     {
         var DashDir = ProcessedDirection; 
 
         playerTransform.DOMove(transform.position + DashDir * dashForce, dashDuration);
-
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
 

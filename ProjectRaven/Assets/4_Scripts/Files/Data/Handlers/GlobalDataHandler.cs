@@ -41,7 +41,8 @@ namespace System.IO.DataHandling{
         {
             using FileStream stream = new(filePath, FileMode.Create);
             using StreamWriter writer = new(stream);
-        }
+            writer.Write(storableData);
+        } // Currently not used
         //_________________________________________________________________________________
 
 
