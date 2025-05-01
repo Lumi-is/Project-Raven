@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using OggVorbis;
 
 namespace System.IO.DataHandling
 {
@@ -35,8 +36,14 @@ namespace System.IO.DataHandling
                 //Get every phase's paths
                 string phasePath = Path.Combine(path, phaseNameList[i]);
 
+                // Create subfolder for each phase
+                GlobalDataHandler.CreateDirectory(phasePath);
+
                 //Also creates blank json files as a base for level editing 
-                PhaseDataHandler.CreatePhaseToJson(phase, Path.Combine(phasePath+".json"));
+                PhaseDataHandler.CreatePhaseToJson(phase, Path.Combine(phasePath, phaseNameList[i]+".json"));
+
+                // Saves current phase's song with the same name as the phase to the phase directory
+                VorbisPlugin.Save(Path.Combine(phasePath,phaseNameList[i]+".ogg"),phaseSongList[i],1);
             }
             //_________________________________________________________________________________
         }
@@ -65,15 +72,20 @@ namespace System.IO.DataHandling
 
             if(Directory.Exists(levelPath))
             {
-                Debug.Log("Level "+levelName+" was loaded!");
                 LevelData levelData = new(levelName);
-                string[] phaseFiles = Directory.GetFiles(levelPath); 
+                string[] phaseFiles = Directory.GetDirectories(levelPath); 
 
                 foreach (string phase in phaseFiles)
                 {
-                    PhaseData phaseData = PhaseDataHandler.LoadPhase(phase);
-                    levelData.phaseList.Add(phaseData);
+                    string phasePath = Path.Combine(phase,Directory.GetFiles(phase)[0]);
+                    PhaseData phaseData = PhaseDataHandler.LoadPhase(phasePath);
+                    levelData.phaseDataList.Item1.Add(phaseData);
+
+                    string phaseSongPath = Path.Combine(phase,Directory.GetFiles(phase)[1]);
+                    AudioClip audioClip = VorbisPlugin.Load(phaseSongPath);
+                    levelData.phaseDataList.Item2.Add(audioClip);
                 }
+                Debug.Log("Level "+levelName+" was loaded!");
                 return levelData;
             } else {
                 Debug.Log("Level was not found!");
