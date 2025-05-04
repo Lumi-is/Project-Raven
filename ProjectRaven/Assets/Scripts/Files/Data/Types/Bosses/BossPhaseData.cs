@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PhaseData 
+public class BossPhaseData 
 {
     // Name
     public string phaseName;
@@ -18,7 +18,7 @@ public class PhaseData
 
     // Constructors
 
-    public PhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string PhaseChangeConditionType)
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string PhaseChangeConditionType)
     {
         this.phaseName = phaseName;
         this.beatMatrix = beatMatrix;
@@ -26,7 +26,7 @@ public class PhaseData
         this.PhaseChangeConditionType = PhaseChangeConditionType;        
     }
 
-    public PhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM)
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM)
     {
         this.phaseName = phaseName;
         this.beatMatrix = beatMatrix;
@@ -34,7 +34,7 @@ public class PhaseData
         PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
     }
 
-    public PhaseData(string phaseName, List<List<BeatData>> beatDataArray)
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatDataArray)
     {
         this.phaseName = phaseName;
         beatMatrix = beatDataArray;
@@ -42,7 +42,7 @@ public class PhaseData
         PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
     }
 
-    public PhaseData(string phaseName)
+    public BossPhaseData(string phaseName)
     {
         this.phaseName = phaseName;
         beatMatrix = new();
@@ -50,7 +50,7 @@ public class PhaseData
         PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
     }
 
-    public PhaseData()
+    public BossPhaseData()
     {
         phaseName = "default";
         beatMatrix = new();

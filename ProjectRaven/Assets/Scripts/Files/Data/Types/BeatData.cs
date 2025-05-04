@@ -29,7 +29,7 @@ public class BeatData
     public BeatData()
     {
         //should be set to "none" by default
-        behaviorType = "default";
+        behaviorType = "LinearBullet";
         attackPos = new float[2];
     }
 }

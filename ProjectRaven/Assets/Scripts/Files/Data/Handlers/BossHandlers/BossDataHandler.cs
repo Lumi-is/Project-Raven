@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using OggVorbis;
+using Tools;
 
 namespace System.IO.DataHandling
 {
@@ -9,11 +10,11 @@ namespace System.IO.DataHandling
         //Creation of a blank level
         public static void CreateBossLevel(List<AudioClip> phaseSongList, List<string> phaseNameList, string levelName, float BPM)
         {
-            //Sets the phaseamount variable to be used for slightly less cpu usage every time the script is run
+            //Sets the phaseamount variable to be used for slightly less CPU usage every time the script is run
             int phaseAmount = phaseNameList.Count;
 
-            //To make a path for level into directory (Default/Data/Levels/levelFilePath)
-            string path = Path.Combine(Application.persistentDataPath,"Data","Levels",levelName);
+            //To make a path for level into directory (Default/Data/Bosses/levelName)
+            string path = Path.Combine(LevelEventManager.bossLevelDirectoryPath,levelName);
 
             //If already exists, stop execution
             if(Directory.Exists(path)) return;
@@ -28,10 +29,10 @@ namespace System.IO.DataHandling
             for(int i = 0; i < phaseAmount; i++)
             {
                 //Creates a new list the length of how many beats this part of the song has and by default one attack per beat
-                List<List<BeatData>> beatList2D = PhaseDataHandler.CreateBeatList2D((int)(phaseSongList[i].length / 60 * BPM), 1);
+                List<List<BeatData>> beatList2D = MatrixDataHandler.CreateBeatList2D((int)(phaseSongList[i].length / 60 * BPM), 1);
 
                 //Uses phaseData constructor to create a new phaseData object according to the statistics given
-                PhaseData phase = new(phaseNameList[i], beatList2D, BPM);
+                BossPhaseData phase = new(phaseNameList[i], beatList2D, BPM);
 
                 //Get every phase's paths
                 string phasePath = Path.Combine(path, phaseNameList[i]);
@@ -40,7 +41,7 @@ namespace System.IO.DataHandling
                 GlobalDataHandler.CreateDirectory(phasePath);
 
                 //Also creates blank json files as a base for level editing 
-                PhaseDataHandler.CreatePhaseToJson(phase, Path.Combine(phasePath, phaseNameList[i]+".json"));
+                MatrixDataHandler.CreateFileAsJson(phase, Path.Combine(phasePath, phaseNameList[i]+".json"));
 
                 // Saves current phase's song with the same name as the phase to the phase directory
                 VorbisPlugin.Save(Path.Combine(phasePath,phaseNameList[i]+".ogg"),phaseSongList[i],1);
@@ -51,14 +52,15 @@ namespace System.IO.DataHandling
 
 
         //_________________________________________________________________________________
-        public static void DeleteBossLevel(string levelName)
+        public static void DeleteBossLevel(string name)
         {
-            string path = Path.Combine(Application.persistentDataPath,"Data","Levels",levelName);
+            Debug.Log(Path.Combine(LevelEventManager.bossLevelDirectoryPath,name));
+            string path = Path.Combine(LevelEventManager.bossLevelDirectoryPath,name);
             if(Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             } else {
-                Debug.Log("Level to delete from" + path + " not found!");
+                Debug.Log("Level to delete from path \"" + path + "\" not found!");
             }
         }
         //_________________________________________________________________________________
@@ -66,31 +68,39 @@ namespace System.IO.DataHandling
 
 
         //_________________________________________________________________________________
-        public static BossData LoadBossLevel(string levelName)
+        public static BossData LoadBossLevel(string name)
         {
-            string levelPath = Path.Combine(Application.persistentDataPath,"Data","Levels",levelName);
+            string path = Path.Combine(LevelEventManager.bossLevelDirectoryPath,name);
 
-            if(Directory.Exists(levelPath))
+            if(Directory.Exists(path))
             {
-                BossData levelData = new(levelName);
-                string[] phaseFiles = Directory.GetDirectories(levelPath); 
+                BossData levelData = new(name);
+                string[] phaseFiles = Directory.GetDirectories(path); 
 
                 foreach (string phase in phaseFiles)
                 {
                     string phasePath = Path.Combine(phase,Directory.GetFiles(phase)[0]);
-                    PhaseData phaseData = PhaseDataHandler.LoadPhase(phasePath);
+                    BossPhaseData phaseData = LoadPhase(phasePath);
                     levelData.phaseDataList.Item1.Add(phaseData);
 
                     string phaseSongPath = Path.Combine(phase,Directory.GetFiles(phase)[1]);
                     AudioClip audioClip = VorbisPlugin.Load(phaseSongPath);
                     levelData.phaseDataList.Item2.Add(audioClip);
                 }
-                Debug.Log("Level "+levelName+" was loaded!");
+                Debug.Log("Level "+name+" was loaded!");
                 return levelData;
             } else {
-                Debug.Log("Level was not found!");
+                Debug.Log("\""+name+"\" was not found! Check input name and try again.");
                 return null;
             }
+        }
+        //_________________________________________________________________________________
+
+        //_________________________________________________________________________________
+        public static BossPhaseData LoadPhase(string filePath)
+        {
+            BossPhaseData loadedPhase = JsonConverter.FromJson<BossPhaseData>(filePath);
+            return loadedPhase;
         }
         //_________________________________________________________________________________
     }

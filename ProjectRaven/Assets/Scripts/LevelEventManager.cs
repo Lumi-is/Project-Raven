@@ -4,15 +4,59 @@ using UnityEngine;
 using System.IO.DataHandling;
 using System.IO;
 using System;
+using Unity.Collections;
+using NUnit.Framework.Internal.Commands;
 
 
-public class LevelManager : MonoBehaviour
+public class LevelEventManager : MonoBehaviour
 {   
-    #region Boss Variables
+
+    // Variables //
+
+
+
+    #region Level Management Variables
     //_________________________________________________________________________________
 
     // Whether or not a boss level is active
-    public bool bossActive;
+    [Header("Level Attributes")]
+    public bool bossOverridesAreaLevel;
+
+    [Header("Level Data")]
+
+    // BPM of the phase that is currently ongoing. Can be kept private, but uses the SerializeField access modifier for easier debugging
+    public static float currentBPM;
+
+    // PersistentDataPath + /Data/Bosses/
+    public static string bossLevelDirectoryPath;
+
+    // PersistentDataPath + /Data/Areas/
+    public static string areaLevelDirectoryPath;
+
+
+    //_________________________________________________________________________________
+    #endregion
+
+
+
+    #region Boss Variables
+    //_________________________________________________________________________________
+    
+    // Level Specifics // 
+    // Used to find the current level from levels folder
+    [Header("Boss Level")]
+    [SerializeField] string currentBossLevelName;
+
+    // Currently used boss level
+    public static BossData currentBossData;
+
+    // Currently used phase of the boss
+    public static BossPhaseData currentPhaseData; 
+
+    // List of spawnable items per beat
+    public static List<BeatData> currentBossSpawnableList;
+
+    // Entity Specifics //
 
     // Boss's current HP amount, if one is active
     public float currentBossHP;
@@ -25,26 +69,20 @@ public class LevelManager : MonoBehaviour
 
 
 
-    #region Boss Level Management Variables
+    #region Area Management Variables
     //_________________________________________________________________________________
 
-    [Header("Level Data")]
-
+    // Level // 
     // Used to find the current level from levels folder
-    [SerializeField] string currentBossLevelName;
+    [Header("Area Level")]
+    [SerializeField] string currentAreaLevelName;
+    [SerializeField] AreaLevelData currentAreaLevelData;
+
+    [SerializeField] AreaData currentAreaData;
     
-    // Currently used boss level
-    public static BossData currentBossData;
+    [SerializeField] RoomData currentRoomData;
 
-    // List of spawnable items per beat
-    public static List<BeatData> currentSpawnableList;
-
-    // BPM of the phase that is currently ongoing. Can be kept private, but uses the SerializeField access modifier for easier debugging
-    public static float currentBPM;
-
-    // PersistentDataPath + /Data/Levels/
-    public static string bossLevelDirectoryPath;
-
+    public static List<BeatData> currentAreaSpawnableList;
     //_________________________________________________________________________________
     #endregion
 
@@ -78,8 +116,7 @@ public class LevelManager : MonoBehaviour
     public static bool OnBeat;
 
     [Header("Current items")]
-    public static int currentBeat;
-    public static PhaseData currentPhaseData; 
+    public int currentBeat;
     //_________________________________________________________________________________
     #endregion
 
@@ -89,7 +126,7 @@ public class LevelManager : MonoBehaviour
     //_________________________________________________________________________________
 
     [Header("Sound")]
-    [SerializeField] AudioSource MusicPlayer;
+    [SerializeField] AudioSource musicPlayer;
 
     [Header("Music Attributes")]
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
@@ -114,15 +151,26 @@ public class LevelManager : MonoBehaviour
 
 
 
+    // Class & Methods // 
+
+
+
     #region Initialization
     //_________________________________________________________________________________
     void Start()
     {
-        // Initializing levelDirectoryPath to be /Data/Levels/
-        bossLevelDirectoryPath = Path.Combine(Application.persistentDataPath,"Data","Levels");
+        // Initializing levelDirectoryPath to be /Data/Bosses/ for boss levels
+        bossLevelDirectoryPath = Path.Combine(Application.persistentDataPath,"Data","Bosses"); 
         if(!Directory.Exists(bossLevelDirectoryPath))
         {
             GlobalDataHandler.CreateDirectory(bossLevelDirectoryPath);
+        }
+
+        // Initializing levelDirectoryPath to be /Data/Areas/ for area levels
+        areaLevelDirectoryPath = Path.Combine(Application.persistentDataPath,"Data","Areas"); 
+        if(!Directory.Exists(areaLevelDirectoryPath))
+        {
+            GlobalDataHandler.CreateDirectory(areaLevelDirectoryPath);
         }
 
         // For initializing bulletDictionary
@@ -136,7 +184,11 @@ public class LevelManager : MonoBehaviour
         {
             gameObject.AddComponent<AudioSource>();
         }
-        MusicPlayer = gameObject.GetComponent<AudioSource>();
+        musicPlayer = gameObject.GetComponent<AudioSource>();
+
+
+        //DEBUGGING ONLY: REMOVE IF CODE IS COMPLETE
+        gameObject.GetComponent<LevelEditor>().CreateDebugLevels();
     }
     //_________________________________________________________________________________
     #endregion
@@ -147,50 +199,41 @@ public class LevelManager : MonoBehaviour
     //_________________________________________________________________________________
     void Update()
     {
-        if(bossActive)
-        {
-            BossLevelActions();
-        } else {
-            OtherLevelActions();
-        }
+        DoLevelActions();
     }
     //_________________________________________________________________________________    
     #endregion
 
 
 
-    #region Boss Level Management
+    #region Level Management
     //_________________________________________________________________________________
-    public void StartBoss()
+    public void StartLevel()
     {
         currentBossData = BossDataHandler.LoadBossLevel(currentBossLevelName);
         currentPhaseData = currentBossData.phaseDataList.Item1[0];
-        MusicPlayer.clip = currentBossData.phaseDataList.Item2[0];
+        musicPlayer.clip = currentBossData.phaseDataList.Item2[0];
+
+        currentAreaLevelData = AreaLevelHandler.LoadAreaLevel(currentAreaLevelName);
+        currentAreaData = currentAreaLevelData.areaDataList.Item1[0];
+        currentRoomData = currentAreaData.roomList[0];
+        musicPlayer.clip = currentAreaLevelData.areaDataList.Item2[0];
         
-        bossActive = true;
-        OnPhaseReset();
+        OnBeatReset();
         StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit)); 
     }
     //_________________________________________________________________________________
 
-    public void StopBoss()
-    {
-        currentBossData = null;
-        currentPhaseData = null;
-        MusicPlayer.clip = null; // set this to current level ost
-
-        bossActive = false;
-        StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit)); 
-    }
-
 
 
     //_________________________________________________________________________________
-    private void BossLevelActions()
+    private void DoLevelActions()
     {
         // Sets the currentFrameMusicTime to be the music time from current clip
-        currentFrameMusicTime = MusicPlayer.time;
+        currentFrameMusicTime = musicPlayer.time;
 
+        // If currentData is null, ignores it and tests for area data instead
+        if(currentPhaseData == null) goto testForAreaLevel;
         // Checks if enough time has gone from last beat for the beat change to occur
         // Additionally, makes sure the music is not at it's end
         if(currentFrameMusicTime >= lastBeat + timeBetweenBeats && currentBeat < currentPhaseData.beatMatrix.Count)
@@ -215,13 +258,48 @@ public class LevelManager : MonoBehaviour
                 cooldownUntilNextAction--;
             }
             
-            OnPhaseReset();
+            OnBeatReset();
             
             StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
         }
+
+        testForAreaLevel:
+
+        // If currentData here is also null, ignores it too and skips execution on current frame
+        if(currentAreaData == null) goto skip;
+
+        // Checks if enough time has gone from last beat for the beat change to occur
+        // Additionally, makes sure the music is not at it's end
+        if(currentFrameMusicTime >= lastBeat + timeBetweenBeats && currentBeat < currentRoomData.beatMatrix.Count)
+        {
+            lastBeat += timeBetweenBeats;
+            if(cooldownUntilNextAction != 0)
+            {
+                cooldownUntilNextAction--;
+            }
+
+            OnBeatChange();
+
+            StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+        } 
+
+        // Checks if enough time has gone from last beat for the beat change to occur
+        // This is for executing the correct actions if the music is at its last beat and should be looped
+        else if(currentFrameMusicTime >= lastBeat + timeBetweenBeats && currentBeat == currentRoomData.beatMatrix.Count)
+        {
+            if(cooldownUntilNextAction != 0)
+            {
+                cooldownUntilNextAction--;
+            }
+            
+            OnBeatReset();
+            
+            StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+        }
+        skip:;
     }
 
-        #region PhaseManagement
+        #region Phase Management
         //_________________________________________________________________________________
         private void StartConditionTypeActions()
         {
@@ -262,13 +340,12 @@ public class LevelManager : MonoBehaviour
         {
             // Gets the index of the next item in the list
             var next = currentBossData.phaseDataList.Item1.IndexOf(currentPhaseData) + 1;
-            Debug.Log("test");
 
             if (next < currentBossData.phaseDataList.Item1.Count) {
                 // Sets the currentPhaseData to be the next level
                 currentPhaseData = currentBossData.phaseDataList.Item1[next];
-                MusicPlayer.clip = currentBossData.phaseDataList.Item2[next];
-                OnPhaseReset();
+                musicPlayer.clip = currentBossData.phaseDataList.Item2[next];
+                OnBeatReset();
             } 
             else {
                 // Boss death, level victory
@@ -282,32 +359,7 @@ public class LevelManager : MonoBehaviour
 
 
 
-    #region Other Level Management
-    //_________________________________________________________________________________
-    private void OtherLevelActions()
-    {
-        // Sets the currentFrameMusicTime to be the music time from current clip
-        currentFrameMusicTime = MusicPlayer.time;
-
-        // Checks if enough time has gone from last beat for the beat change to occur
-        // Additionally, makes sure the music is not at it's end
-        if(currentFrameMusicTime >= lastBeat + timeBetweenBeats)
-        {
-            lastBeat += timeBetweenBeats;
-            if(cooldownUntilNextAction != 0)
-            {
-                cooldownUntilNextAction--;
-            }
-
-            StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
-        } 
-    }
-    //_________________________________________________________________________________
-    #endregion
-
-
-
-    #region BeatManagement
+    #region Beat Management
     //_________________________________________________________________________________
     private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
     {
@@ -324,7 +376,20 @@ public class LevelManager : MonoBehaviour
     //_________________________________________________________________________________
     public void OnBeatChange()
     {
-        currentSpawnableList = currentPhaseData.beatMatrix[currentBeat];   
+        if(bossOverridesAreaLevel) {
+            currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];  
+            currentAreaSpawnableList = new(); 
+        } else {
+            if(currentPhaseData != null)
+            {
+                currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];
+            }
+    
+            if(currentAreaData != null)
+            {
+                currentAreaSpawnableList = currentRoomData.beatMatrix[currentBeat];
+            }
+        }
         SpawnEnemies();
         currentBeat++;
     }
@@ -333,42 +398,64 @@ public class LevelManager : MonoBehaviour
 
 
     //_________________________________________________________________________________
-    public void OnPhaseReset()
+    public void OnBeatReset()
     {
         lastBeat = 0;
         currentBeat = 0;
-        currentBPM = currentPhaseData.BPM;
-        timeBetweenBeats = 60f/currentBPM;
-        MusicPlayer.time = (float)GetCorrectAudioStartTime();
-        MusicPlayer.Stop();
-        MusicPlayer.Play();
-        currentSpawnableList = currentPhaseData.beatMatrix[currentBeat];
+
+        if(bossOverridesAreaLevel)
+        {
+            currentBPM = currentPhaseData.BPM;
+            currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];  
+            currentAreaSpawnableList = new(); 
+        } else {
+            if(currentPhaseData != null)
+            {
+                currentBPM = currentPhaseData.BPM;
+                currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];
+            }
+    
+            if(currentAreaData != null)
+            {
+                currentBPM = currentAreaData.BPM;
+                currentAreaSpawnableList = currentRoomData.beatMatrix[currentBeat];
+            }
+        }
+
+        timeBetweenBeats = 60f/currentBPM;     
+        SpawnEnemies();
+        musicPlayer.time = (float)CorrectAudioStartTime();
+        musicPlayer.Stop();
+        musicPlayer.Play();
 
         StartConditionTypeActions();
-        SpawnEnemies();
         currentBeat++;
     }
     //_________________________________________________________________________________
+    #endregion
 
 
 
+    #region Music Management
     //_________________________________________________________________________________
-    private double GetCorrectAudioStartTime()
+    private double CorrectAudioStartTime()
     {
-        double correctAudioStartTime = MusicPlayer.clip.length - Math.Round(MusicPlayer.clip.length);
+        double correctAudioStartTime = musicPlayer.clip.length - Math.Round(musicPlayer.clip.length);
         return correctAudioStartTime;
     }
     //_________________________________________________________________________________
     #endregion
 
 
+
     #region SpawnManagement
     //_________________________________________________________________________________
     private void SpawnEnemies()
     {
-        foreach (BeatData beat in currentSpawnableList)
+        if(currentBossSpawnableList == null) goto areaList; // Skips the foreach if currentBossSpawnableList is null
+        foreach (BeatData beat in currentBossSpawnableList)
         {
-            //Spawn
+            // Spawn boss bullets, movements and threats
             if(beat.behaviorType != "none")
             {
                 GameObject instantiatedObject = Instantiate(bulletDictionary[beat.behaviorType], new Vector3(beat.attackPos[0], 0, beat.attackPos[1]), Quaternion.identity);
@@ -376,7 +463,22 @@ public class LevelManager : MonoBehaviour
                 activeBulletList.Item2.Add(beat);
             }
         }
+        areaList:;
+
+        if(currentAreaSpawnableList == null) goto next; // Skips the foreach if currentBossSpawnableList is null
+        foreach (BeatData beat in currentAreaSpawnableList)
+        {
+            // Spawn area bullets, enemies and threats
+            if(beat.behaviorType != "none")
+            {
+                GameObject instantiatedObject = Instantiate(bulletDictionary[beat.behaviorType], new Vector3(beat.attackPos[0], 0, beat.attackPos[1]), Quaternion.identity);
+                activeBulletList.Item1.Add(instantiatedObject);
+                activeBulletList.Item2.Add(beat);
+            }
+        }
+        next:;
     }
     //_________________________________________________________________________________
     #endregion
+
 }

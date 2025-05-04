@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BasicLinearBullet : MonoBehaviour
 {
-    public DefaultBulletStats bulletStatistics;
+    public LinearBulletStats bulletStatistics;
 
     public bool shootAtPlayer;
 

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -3013348832661052524}
   - component: {fileID: -1412030182020101596}
   m_Layer: 0
-  m_Name: default
+  m_Name: LinearBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

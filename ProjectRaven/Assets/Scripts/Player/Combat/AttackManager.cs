@@ -7,7 +7,7 @@ public class AttackManager : MonoBehaviour
     private InputAction SecondaryAttack;
 
     [Header("Rhythm")]
-    [SerializeField] LevelManager playerManager;
+    [SerializeField] LevelEventManager playerManager;
 
     [Header("Weapons")]
     [SerializeField] MeleeWeaponPreset[] weaponArray = new MeleeWeaponPreset[4];

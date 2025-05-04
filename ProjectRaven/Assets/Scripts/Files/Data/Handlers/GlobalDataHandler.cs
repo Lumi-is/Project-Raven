@@ -22,7 +22,7 @@ namespace System.IO.DataHandling{
                 } else {
                     if(asJson)
                     {
-                        PhaseDataHandler.CreatePhaseToJson(storableData, filePath);
+                        MatrixDataHandler.CreateFileAsJson(storableData, filePath);
                     } else {
                         CreateFile(storableData, filePath);
                     }

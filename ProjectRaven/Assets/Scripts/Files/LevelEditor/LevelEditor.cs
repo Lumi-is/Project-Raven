@@ -4,21 +4,30 @@ using System.IO.DataHandling;
 
 public class LevelEditor : MonoBehaviour
 {
-    [Header("Level information")]
-    [SerializeField] string levelName;
-
-    [Header("Phases information")]
+    [Header("Boss information")]
+    [SerializeField] string bossName;
     [SerializeField] List<string> phaseNameList;
+
+    [Header("AreaLevel information")]
+    [SerializeField] string areaLevelName;
+    [SerializeField] List<string> areaNameList;
+
+    [SerializeField] List<string> roomNameList;
 
     [Header("Song information")]
 
     [SerializeField] List<AudioClip> phaseSongList;
     [SerializeField] float defaultBPM;
 
-    void Awake()
+
+
+    //DEBUGGING ONLY: REMOVE IF CODE IS COMPLETE
+    public void CreateDebugLevels()
     {
-        //Debugging and testing ONLY
-        BossDataHandler.DeleteBossLevel(levelName);
-        BossDataHandler.CreateBossLevel(phaseSongList, phaseNameList, levelName, defaultBPM);
+        BossDataHandler.DeleteBossLevel(bossName);
+        BossDataHandler.CreateBossLevel(phaseSongList, phaseNameList, bossName, defaultBPM);
+
+        AreaLevelHandler.DeleteAreaLevel(areaLevelName);
+        AreaLevelHandler.CreateAreaLevel(phaseSongList, areaNameList, areaLevelName, defaultBPM, roomNameList);
     }
 }

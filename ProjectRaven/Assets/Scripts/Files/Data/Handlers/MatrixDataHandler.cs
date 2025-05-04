@@ -4,10 +4,10 @@ using UnityEngine;
 using OggVorbis;
 
 namespace System.IO.DataHandling{
-    public  class PhaseDataHandler
+    public  class MatrixDataHandler
     {  
         //Exclusive for creation of .json based level files
-        public static void CreatePhaseToJson<T>(T storableData, string filePath)
+        public static void CreateFileAsJson<T>(T storableData, string filePath)
         {
             using FileStream stream = new(filePath, FileMode.Create);
             using StreamWriter writer = new(stream);
@@ -16,13 +16,6 @@ namespace System.IO.DataHandling{
         //_________________________________________________________________________________
 
 
-        //_________________________________________________________________________________
-        public static PhaseData LoadPhase(string filePath)
-        {
-            PhaseData loadedPhase = JsonConverter.FromJson<PhaseData>(filePath);
-            return loadedPhase;
-        }
-        //_________________________________________________________________________________
 
         public static AudioClip LoadPhaseAudio(string filePath)
         {

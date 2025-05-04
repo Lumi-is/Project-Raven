@@ -27,7 +27,7 @@ public class MovementController : MonoBehaviour
     private bool isDashOnCoolDown;
 
     [Header("Rhythm")]
-    [SerializeField] LevelManager levelManager;
+    [SerializeField] LevelEventManager levelManager;
 
     [Header("Turning")]
     [SerializeField] AttackManager attackScript;
@@ -77,11 +77,11 @@ public class MovementController : MonoBehaviour
             orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
 
-        if(LevelManager.OnBeat && dash.IsPressed() && !isDashOnCoolDown && LevelManager.cooldownUntilNextAction == 0)
+        if(LevelEventManager.OnBeat && dash.IsPressed() && !isDashOnCoolDown && LevelEventManager.cooldownUntilNextAction == 0)
         {
             isDashOnCoolDown = true;
             isDashing = true;
-            LevelManager.cooldownUntilNextAction = 1;
+            LevelEventManager.cooldownUntilNextAction = 1;
             StartCoroutine(Dashing());
         } else {
             //Incorrect sound
