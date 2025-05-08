@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 public class BeatData 
 {
@@ -6,30 +6,59 @@ public class BeatData
     public string behaviorType;
 
     //If null, means position is determined in behavior type script. Otherwise spawns object in position [attackPos]
-    public float[] attackPos;
+    public float[] spawnPos;
 
+    //
+    public string posAnchor = null;
 
-    public BeatData(string behaviorType, float[] attackPos)
+    public float? lifetime;
+
+    public BeatData(string behaviorType, float[] spawnPos, string posAnchor, float? lifetime)
     {
         this.behaviorType = behaviorType;
-        this.attackPos = attackPos;
+        this.spawnPos = spawnPos;
+        this.posAnchor = posAnchor;
+        this.lifetime = lifetime;
+    }
+
+    public BeatData(string behaviorType, float[] spawnPos, string posAnchor)
+    {
+        this.behaviorType = behaviorType;
+        this.spawnPos = spawnPos;
+        this.posAnchor = posAnchor;
+        lifetime = 10;
+    }
+
+    public BeatData(string behaviorType, float[] spawnPos)
+    {
+        this.behaviorType = behaviorType;
+        this.spawnPos = spawnPos;
+        posAnchor = null;
+        lifetime = 10;
     }
 
     public BeatData(string behaviorType)
     {
         this.behaviorType = behaviorType;
-        attackPos = new float[2];
+        spawnPos = new float[2];
+        posAnchor = null;
+        lifetime = 10;
     }
 
-    public BeatData(float[] attackPos)
+    public BeatData(float[] spawnPos)
     {
-        behaviorType = "none";
-        this.attackPos = attackPos;
+        behaviorType = null;
+        this.spawnPos = spawnPos;
+        posAnchor = null;
+        lifetime = 10;
     }
+
     public BeatData()
     {
-        //should be set to "none" by default
+        //should be set to null by default. Is "linearBullet" for testing reasons
         behaviorType = "LinearBullet";
-        attackPos = new float[2];
+        spawnPos = new float[2];
+        posAnchor = null;
+        lifetime = 10;
     }
 }

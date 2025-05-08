@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public class BossPhaseData 
 {
@@ -14,16 +13,40 @@ public class BossPhaseData
     public List<List<BeatData>> beatMatrix;
 
     // For checking if condition for phase transition to next is met
-    public string PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE"; //Accepted values: BOSSHPPERCENTAGE, BOSSHPPHASEPERCENTAGE, TIMER, AREA
+    public string phaseChangeConditionType = "BOSSHPPHASEPERCENTAGE"; //Accepted values: BOSSHPPERCENTAGE, BOSSHPPHASEPERCENTAGE, TIMER, AREA
+    public int timerAmount; // If phaseChangeConditionType = TIMER, this is the amount of seconds used 
+    public float percentageAmount; // IF phaseChangeConditionType = BOSSHPPERCENTAGE, this is the amount where phase is changed to the next
+
 
     // Constructors
-
-    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string PhaseChangeConditionType)
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string phaseChangeConditionType, int timerAmount, float percentageAmount)
     {
         this.phaseName = phaseName;
         this.beatMatrix = beatMatrix;
         this.BPM = BPM;
-        this.PhaseChangeConditionType = PhaseChangeConditionType;        
+        this.phaseChangeConditionType = phaseChangeConditionType;
+        this.timerAmount = timerAmount; 
+        this.percentageAmount = percentageAmount;       
+    }
+
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string phaseChangeConditionType, int timerAmount)
+    {
+        this.phaseName = phaseName;
+        this.beatMatrix = beatMatrix;
+        this.BPM = BPM;
+        this.phaseChangeConditionType = phaseChangeConditionType;
+        this.timerAmount = timerAmount;
+        percentageAmount = 0;          
+    }
+
+    public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM, string phaseChangeConditionType)
+    {
+        this.phaseName = phaseName;
+        this.beatMatrix = beatMatrix;
+        this.BPM = BPM;
+        this.phaseChangeConditionType = phaseChangeConditionType;
+        timerAmount = 0;
+        percentageAmount = 0;         
     }
 
     public BossPhaseData(string phaseName, List<List<BeatData>> beatMatrix, float BPM)
@@ -31,7 +54,9 @@ public class BossPhaseData
         this.phaseName = phaseName;
         this.beatMatrix = beatMatrix;
         this.BPM = BPM;
-        PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        phaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        timerAmount = 0;
+        percentageAmount = 0;     
     }
 
     public BossPhaseData(string phaseName, List<List<BeatData>> beatDataArray)
@@ -39,7 +64,9 @@ public class BossPhaseData
         this.phaseName = phaseName;
         beatMatrix = beatDataArray;
         BPM = 0;
-        PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        phaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        timerAmount = 0;
+        percentageAmount = 0;     
     }
 
     public BossPhaseData(string phaseName)
@@ -47,14 +74,18 @@ public class BossPhaseData
         this.phaseName = phaseName;
         beatMatrix = new();
         BPM = 0;
-        PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        phaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        timerAmount = 0;
+        percentageAmount = 0;     
     }
 
     public BossPhaseData()
     {
-        phaseName = "default";
+        phaseName = "";
         beatMatrix = new();
         BPM = 0;
-        PhaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        phaseChangeConditionType = "BOSSHPPHASEPERCENTAGE";
+        timerAmount = 0;
+        percentageAmount = 0;     
     }
 }

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.IO.DataHandling;
-using UnityEngine.LightTransport.PostProcessing;
 
 public class AreaData
 {

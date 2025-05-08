@@ -73,16 +73,16 @@ namespace System.IO.DataHandling
             if(Directory.Exists(path))
             {
                 AreaLevelData areaLevelData = new(name);
-                string[] phaseFiles = Directory.GetDirectories(path); 
+                string[] files = Directory.GetDirectories(path); 
 
-                foreach (string phase in phaseFiles)
+                foreach (string area in files)
                 {
-                    string phasePath = Path.Combine(phase,Directory.GetFiles(phase)[0]);
-                    AreaData areaData = LoadArea(phasePath);
+                    string areaPath = Path.Combine(area,Directory.GetFiles(area)[0]);
+                    AreaData areaData = LoadArea(areaPath);
                     areaLevelData.areaDataList.Item1.Add(areaData);
 
-                    string phaseSongPath = Path.Combine(phase,Directory.GetFiles(phase)[1]);
-                    AudioClip audioClip = VorbisPlugin.Load(phaseSongPath);
+                    string areaSongPath = Path.Combine(area,Directory.GetFiles(area)[1]);
+                    AudioClip audioClip = VorbisPlugin.Load(areaSongPath);
                     areaLevelData.areaDataList.Item2.Add(audioClip);
                 }
                 Debug.Log("Level "+name+" was loaded!");
