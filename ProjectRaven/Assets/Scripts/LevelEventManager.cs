@@ -4,8 +4,6 @@ using UnityEngine;
 using System.IO.DataHandling;
 using System.IO;
 using System;
-using UnityEditor;
-using NUnit.Framework;
 
 
 public class LevelEventManager : MonoBehaviour
@@ -26,6 +24,8 @@ public class LevelEventManager : MonoBehaviour
     public bool bossOverridesAreaLevel;
 
     [Header("Level Data")]
+
+    public bool LevelActive;
 
     // BPM of the phase that is currently ongoing. Can be kept private, but uses the SerializeField access modifier for easier debugging
     public static float currentBPM;
@@ -132,6 +132,9 @@ public class LevelEventManager : MonoBehaviour
 
     [Header("Sound")]
     [SerializeField] AudioSource musicPlayer;
+    [SerializeField] bool guessMusicOffset = true;
+    [Range(0,10)]
+    [SerializeField] double musicOffset;
 
     [Header("Music Attributes")]
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
@@ -243,6 +246,13 @@ public class LevelEventManager : MonoBehaviour
     {
         LoadLevel();
         ResetBeat();
+        LevelActive = true;
+    }
+
+    public void StopLevel()
+    {
+        LevelActive = false;
+        ResetBeat();
     }    
     public void SetAllActive()
     {
@@ -270,6 +280,8 @@ public class LevelEventManager : MonoBehaviour
         // Every frame
         void Update()
         {
+            if(!LevelActive) return;
+
             // Sets the currentFrameMusicTime to be the music time from current clip
             currentFrameTime = Time.time;
             
@@ -533,9 +545,9 @@ public class LevelEventManager : MonoBehaviour
         }
 
         timeBetweenBeats = 60f/currentBPM;
-        musicPlayer.time = (float)CorrectAudioStartTime();
         musicPlayer.Stop();
-        musicPlayer.Play();    
+        musicPlayer.Play();
+        musicPlayer.time = (float)CorrectAudioStartTime();    
     }
     //_________________________________________________________________________________
     #endregion
@@ -546,8 +558,14 @@ public class LevelEventManager : MonoBehaviour
     //_________________________________________________________________________________
     private double CorrectAudioStartTime()
     {
-        double correctAudioStartTime = musicPlayer.clip.length - Math.Round(musicPlayer.clip.length);
-        return correctAudioStartTime;
+        if(guessMusicOffset)
+        {
+            double correctAudioStartTime = musicPlayer.clip.length - Math.Round(musicPlayer.clip.length);
+            return correctAudioStartTime;
+        } else {
+            return musicOffset;
+        }
+        
     }
     //_________________________________________________________________________________
     #endregion

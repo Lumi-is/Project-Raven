@@ -964,6 +964,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeLevelType: NONE
   bossOverridesAreaLevel: 0
+  LevelActive: 0
   currentBossLevelName: testBoss
   currentBossHP: 100
   maxBossHP: 100
@@ -972,6 +973,8 @@ MonoBehaviour:
   - LinearBullet
   currentBeat: 0
   musicPlayer: {fileID: 0}
+  guessMusicOffset: 0
+  musicOffset: 0
   timerOffsetLimit: 0.25
 --- !u!114 &864241197
 MonoBehaviour:
