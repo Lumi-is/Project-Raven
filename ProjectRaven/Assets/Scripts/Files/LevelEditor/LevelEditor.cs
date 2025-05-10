@@ -8,6 +8,8 @@ public class LevelEditor : MonoBehaviour
     [SerializeField] string bossName;
     [SerializeField] List<string> phaseNameList;
 
+    [SerializeField] List<int> phaseVersionAmountList;
+
     [Header("AreaLevel information")]
     [SerializeField] string areaLevelName;
     [SerializeField] List<string> areaNameList;
@@ -25,7 +27,7 @@ public class LevelEditor : MonoBehaviour
     public void CreateDebugLevels()
     {
         BossDataHandler.DeleteBossLevel(bossName);
-        BossDataHandler.CreateBossLevel(phaseSongList, phaseNameList, bossName, defaultBPM);
+        BossDataHandler.CreateBossLevel(phaseSongList, phaseNameList, phaseVersionAmountList, bossName, defaultBPM);
 
         AreaLevelHandler.DeleteAreaLevel(areaLevelName);
         AreaLevelHandler.CreateAreaLevel(phaseSongList, areaNameList, areaLevelName, defaultBPM, roomNameList);

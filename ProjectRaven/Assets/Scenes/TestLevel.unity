@@ -969,6 +969,7 @@ MonoBehaviour:
   currentBossHP: 100
   maxBossHP: 100
   currentAreaLevelName: testAreaLevel
+  roomTypeList: []
   bulletTypeList:
   - LinearBullet
   currentBeat: 0
@@ -976,6 +977,7 @@ MonoBehaviour:
   guessMusicOffset: 0
   musicOffset: 0
   timerOffsetLimit: 0.25
+  DebugLevelCreation: 0
 --- !u!114 &864241197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -993,6 +995,7 @@ MonoBehaviour:
   - Phase1
   - Phase2
   - Phase3
+  phaseVersionAmountList: 010000000100000002000000
   areaLevelName: testAreaLevel
   areaNameList:
   - area1
@@ -1018,7 +1021,8 @@ Transform:
   m_LocalPosition: {x: 639, y: 359.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1562617028}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1351170528
@@ -1811,12 +1815,12 @@ Transform:
   m_GameObject: {fileID: 1562617027}
   serializedVersion: 2
   m_LocalRotation: {x: 0.35355338, y: 0.35355338, z: -0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 0, y: 0, z: 5}
+  m_LocalPosition: {x: -639, y: -359.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 386850547}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 864241198}
   m_LocalEulerAnglesHint: {x: 45, y: 45, z: 0}
 --- !u!1 &1603214463
 GameObject:
@@ -2041,7 +2045,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 291862887}
   - {fileID: 540952496}
-  - {fileID: 1562617028}
   - {fileID: 864241198}
   - {fileID: 1351170535}
   - {fileID: 1483911746}

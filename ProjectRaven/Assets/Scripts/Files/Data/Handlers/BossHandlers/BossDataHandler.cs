@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using OggVorbis;
 using Tools;
+using System;
 
 namespace System.IO.DataHandling
 {
     public class BossDataHandler
     {
         //Creation of a blank level
-        public static void CreateBossLevel(List<AudioClip> phaseSongList, List<string> phaseNameList, string levelName, float BPM)
+        public static void CreateBossLevel(List<AudioClip> phaseSongList, List<string> phaseNameList, List<int> phaseVersionAmountList, string levelName, float BPM)
         {
             //Sets the phaseamount variable to be used for slightly less CPU usage every time the script is run
             int phaseAmount = phaseNameList.Count;
@@ -41,7 +42,10 @@ namespace System.IO.DataHandling
                 GlobalDataHandler.CreateDirectory(phasePath);
 
                 //Also creates blank json files as a base for level editing 
-                MatrixDataHandler.CreateFileAsJson(phase, Path.Combine(phasePath, phaseNameList[i]+".json"));
+                for(int k = 0; k < phaseVersionAmountList[i]; k++)
+                {
+                    MatrixDataHandler.CreateFileAsJson(phase, Path.Combine(phasePath, phaseNameList[i]+"_ver_"+(k+1)+".json"));                   
+                }
 
                 // Saves current phase's song with the same name as the phase to the phase directory
                 VorbisPlugin.Save(Path.Combine(phasePath,phaseNameList[i]+".ogg"),phaseSongList[i],1);
@@ -72,20 +76,27 @@ namespace System.IO.DataHandling
         {
             string path = Path.Combine(LevelEventManager.bossLevelDirectoryPath,name);
 
-            if(Directory.Exists(path))
+            if(Directory.Exists(path)) // Checks if boss level folder exists with the said name
             {
                 BossData levelData = new(name);
-                string[] phaseFiles = Directory.GetDirectories(path); 
+                string[] phaseFolderList = Directory.GetDirectories(path); 
 
-                foreach (string phase in phaseFiles)
+                for(int i = 0; i < phaseFolderList.Length; i++) // Goes through every folder under <bossLevelName>
                 {
-                    string phasePath = Path.Combine(phase,Directory.GetFiles(phase)[0]);
-                    BossPhaseData phaseData = LoadPhase(phasePath);
-                    levelData.phaseDataList.Item1.Add(phaseData);
-
-                    string phaseSongPath = Path.Combine(phase,Directory.GetFiles(phase)[1]);
-                    AudioClip audioClip = VorbisPlugin.Load(phaseSongPath);
-                    levelData.phaseDataList.Item2.Add(audioClip);
+                    levelData.phaseDataList.Item1.Add(new());
+                    string phaseFolder = phaseFolderList[i];
+                    foreach(string filePath in Directory.GetFiles(phaseFolder)) // Checks all files under folder <bossPhaseName>
+                    {
+                        string file = Path.GetFileName(filePath);
+                        if(file.Contains(".json"))
+                        {
+                            BossPhaseData phaseData = LoadPhase(filePath);
+                            levelData.phaseDataList.Item1[i].Add(phaseData);
+                        } else if (file.Contains(".ogg")) {
+                            AudioClip audioClip = VorbisPlugin.Load(filePath);
+                            levelData.phaseDataList.Item2.Add(audioClip);
+                        }
+                    }
                 }
                 Debug.Log("Level "+name+" was loaded!");
                 return levelData;

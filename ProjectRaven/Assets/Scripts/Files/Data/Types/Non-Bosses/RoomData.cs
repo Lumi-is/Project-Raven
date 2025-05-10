@@ -12,28 +12,10 @@ public class RoomData
 
     public float[] roomPos = new float[3]{0,0,0};
 
+    public float roomRotation;
+
     public string roomType;
 
-
-    public RoomData(string roomName, List<List<BeatData>> beatList2D, Vector3 roomPos, string roomType)
-    {
-        this.roomName = roomName;
-        beatMatrix = beatList2D;
-        
-        this.roomPos[0] = roomPos.x; this.roomPos[1] = roomPos.y; this.roomPos[2] = roomPos.z;
-
-        this.roomType = roomType;
-    }
-
-    public RoomData(string roomName, List<List<BeatData>> beatList2D, Vector3 roomPos)
-    {
-        this.roomName = roomName;
-        beatMatrix = beatList2D;
-        
-        this.roomPos[0] = roomPos.x; this.roomPos[1] = roomPos.y; this.roomPos[2] = roomPos.z;
-
-        roomType = "null";
-    }
 
     public RoomData(string roomName, List<List<BeatData>> beatList2D)
     {
@@ -41,27 +23,19 @@ public class RoomData
         beatMatrix = beatList2D;
         
         roomPos[0] = 0; roomPos[1] = 0; roomPos[2] = 0;
+        roomRotation = 0;
 
-        roomType = "null";
-    }
-
-    public RoomData(string roomName)
-    {
-        this.roomName = roomName;
-        beatMatrix = new();
-        
-        roomPos[0] = 0; roomPos[1] = 0; roomPos[2] = 0;
-
-        roomType = "null";
+        roomType = "none";
     }
 
     public RoomData()
     {
-        this.roomName = "null";
+        roomName = "";
         beatMatrix = new();
         
         roomPos[0] = 0; roomPos[1] = 0; roomPos[2] = 0;
+        roomRotation = 0;
 
-        roomType = "null";
+        roomType = "";
     }
 }
