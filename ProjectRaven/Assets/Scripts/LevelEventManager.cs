@@ -325,8 +325,6 @@ public class LevelEventManager : MonoBehaviour
     }
     //_________________________________________________________________________________
 
-
-
         #region On Frame Update
         //_________________________________________________________________________________
         // Every frame
@@ -335,7 +333,7 @@ public class LevelEventManager : MonoBehaviour
             if(!LevelActive) return;
 
             // Sets the currentFrameMusicTime to be the music time from current clip
-            currentFrameTime = Time.time;
+            currentFrameTime = musicPlayer.time;
             
             if(currentBossData != null && (activeLevelType == "BOSS" || activeLevelType == "ALL")) DoBossActions();
             
@@ -350,22 +348,23 @@ public class LevelEventManager : MonoBehaviour
         {
             // Checks if enough time has gone from last beat for the beat change to occur
             // Additionally, makes sure the music is not at it's end
-            if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat < currentPhaseData.beatMatrix.Count)
+            if(currentFrameTime > lastBeat + timeBetweenBeats && currentBeat < currentPhaseData.beatMatrix.Count)
             {
-                lastBeat = currentFrameTime;
+                lastBeat += timeBetweenBeats;
                 if(cooldownUntilNextAction != 0)
                 {
                     cooldownUntilNextAction--;
                 }
-
+                
+                Debug.Log("test");
                 OnBeatChange();
 
-                StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+                StartCoroutine(OnBeatCheck());
             } 
 
             // Checks if enough time has gone from last beat for the beat change to occur
             // This is for executing the correct actions if the music is at its last beat and should be looped
-            else if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat == currentPhaseData.beatMatrix.Count)
+            else if(currentBeat == currentPhaseData.beatMatrix.Count)
             {
                 if(cooldownUntilNextAction != 0)
                 {
@@ -374,7 +373,7 @@ public class LevelEventManager : MonoBehaviour
                 
                 ResetBeat();
                 
-                StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+                StartCoroutine(OnBeatCheck());
             }
         }
         //_________________________________________________________________________________
@@ -388,7 +387,7 @@ public class LevelEventManager : MonoBehaviour
             // Additionally, makes sure the music is not at it's end
             if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat < currentRoomData.beatMatrix.Count)
             {
-                lastBeat = currentFrameTime;
+                lastBeat += timeBetweenBeats;
                 if(cooldownUntilNextAction != 0)
                 {
                     cooldownUntilNextAction--;
@@ -396,7 +395,7 @@ public class LevelEventManager : MonoBehaviour
 
                 OnBeatChange();
 
-                StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+                StartCoroutine(OnBeatCheck());
             } 
 
             // Checks if enough time has gone from last beat for the beat change to occur
@@ -410,7 +409,7 @@ public class LevelEventManager : MonoBehaviour
                 
                 ResetBeat();
                 
-                StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+                StartCoroutine(OnBeatCheck());
             }
         }
         //_________________________________________________________________________________    
@@ -537,12 +536,12 @@ public class LevelEventManager : MonoBehaviour
 
     #region Beat Management
     //_________________________________________________________________________________
-    private IEnumerator BeatEnumerator(float LocalBPM, float offsetTime)
+    private IEnumerator OnBeatCheck()
     {
-        yield return new WaitForSeconds(offsetTime/2);
+        yield return new WaitForSeconds(timerOffsetLimit/2);
         OnBeat = false;
 
-        yield return new WaitForSeconds(60/LocalBPM-offsetTime/2);
+        yield return new WaitForSeconds(timeBetweenBeats-timerOffsetLimit);
         OnBeat = true;
     }
     //_________________________________________________________________________________
@@ -566,7 +565,7 @@ public class LevelEventManager : MonoBehaviour
                 currentAreaSpawnableList = currentRoomData.beatMatrix[currentBeat];
             }
         }
-        StartCoroutine(BeatEnumerator(currentBPM, timerOffsetLimit));
+        StartCoroutine(OnBeatCheck());
         SpawnEnemies();
         currentBeat++;
     }

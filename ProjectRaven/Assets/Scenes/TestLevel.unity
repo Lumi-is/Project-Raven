@@ -976,8 +976,8 @@ MonoBehaviour:
   musicPlayer: {fileID: 0}
   guessMusicOffset: 0
   musicOffset: 0
-  timerOffsetLimit: 0.25
-  DebugLevelCreation: 0
+  timerOffsetLimit: 0.3
+  DebugLevelCreation: 1
 --- !u!114 &864241197
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -994,21 +994,18 @@ MonoBehaviour:
   phaseNameList:
   - Phase1
   - Phase2
-  - Phase3
-  phaseVersionAmountList: 010000000100000002000000
+  phaseVersionAmountList: 0100000001000000
   areaLevelName: testAreaLevel
   areaNameList:
   - area1
   - area2
-  - area3
   roomNameList:
   - Room1
   - Room2
   phaseSongList:
-  - {fileID: 8300000, guid: dfa7c2eb42517aa4488556c4b7f59bd4, type: 3}
-  - {fileID: 8300000, guid: dfa7c2eb42517aa4488556c4b7f59bd4, type: 3}
-  - {fileID: 8300000, guid: dfa7c2eb42517aa4488556c4b7f59bd4, type: 3}
-  defaultBPM: 140
+  - {fileID: 8300000, guid: 42b0f4fdd9027274b89774f150af8749, type: 3}
+  - {fileID: 8300000, guid: 74a65a7ffe86b8e4f953d6867a8c4409, type: 3}
+  defaultBPM: 120
 --- !u!4 &864241198
 Transform:
   m_ObjectHideFlags: 0
@@ -1221,8 +1218,7 @@ MonoBehaviour:
   speed: 10
   dashForce: 5
   dashDuration: 0.2
-  dashCooldownAmount: 0
-  levelManager: {fileID: 0}
+  failedDashDelay: 0.5
   attackScript: {fileID: 1351170536}
   orientation: {fileID: 1419763319}
   gazeFollowedAttackable: {fileID: 0}

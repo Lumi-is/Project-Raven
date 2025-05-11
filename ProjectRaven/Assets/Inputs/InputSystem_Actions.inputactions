@@ -504,6 +504,17 @@
                 },
                 {
                     "name": "",
+                    "id": "5cae23ad-302e-4d2b-b928-14399ee0bb95",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "9b432615-bd15-4d80-9a13-a9abcdc18a56",
                     "path": "<Mouse>/rightButton",
                     "interactions": "",

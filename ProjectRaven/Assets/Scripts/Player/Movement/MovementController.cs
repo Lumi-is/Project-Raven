@@ -16,18 +16,14 @@ public class MovementController : MonoBehaviour
     Vector3 ProcessedDirection;
 
 
-    [Header("Attributes")]
+    [Header("Dash Attributes")]
     public float speed;
-
     public float dashForce;
     public float dashDuration;
-    public float dashCooldownAmount;
-
+    public float failedDashDelay;
     private bool isDashing;
-    private bool isDashOnCoolDown;
+    private bool canDash = true;
 
-    [Header("Rhythm")]
-    [SerializeField] LevelEventManager levelManager;
 
     [Header("Turning")]
     [SerializeField] AttackManager attackScript;
@@ -77,31 +73,30 @@ public class MovementController : MonoBehaviour
             orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
 
-        if(LevelEventManager.OnBeat && dash.IsPressed() && !isDashOnCoolDown && LevelEventManager.cooldownUntilNextAction == 0)
+        if(!LevelEventManager.OnBeat && dash.WasPerformedThisFrame())
         {
-            isDashOnCoolDown = true;
-            isDashing = true;
-            LevelEventManager.cooldownUntilNextAction = 1;
-            StartCoroutine(Dashing());
-        } else {
-            //Incorrect sound
+            //Dash delay
+        }
+
+        if(LevelEventManager.OnBeat && canDash && LevelEventManager.cooldownUntilNextAction == 0 && dash.WasPerformedThisFrame())
+        {
+            StartCoroutine(Dash());
         } 
 
         var step = rotationSpeed * Time.deltaTime;
         transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
- 
     }
     
 
-    IEnumerator Dashing()
+    IEnumerator Dash()
     {
-        var DashDir = ProcessedDirection; 
+        isDashing = true;
+        LevelEventManager.cooldownUntilNextAction = 1;
 
+        var DashDir = ProcessedDirection; 
         playerTransform.DOMove(transform.position + DashDir * dashForce, dashDuration);
+
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
-
-        yield return new WaitForSeconds(dashCooldownAmount-dashDuration);
-        isDashOnCoolDown = false;
     }
 }
