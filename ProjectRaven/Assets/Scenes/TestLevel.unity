@@ -1090,7 +1090,7 @@ MonoBehaviour:
   musicPlayer: {fileID: 0}
   guessMusicOffset: 0
   musicOffset: 0
-  timerOffsetLimit: 0.3
+  timerOffsetLimit: 0.5
   DebugLevelCreation: 1
 --- !u!114 &864241197
 MonoBehaviour:
@@ -1119,7 +1119,7 @@ MonoBehaviour:
   phaseSongList:
   - {fileID: 8300000, guid: 42b0f4fdd9027274b89774f150af8749, type: 3}
   - {fileID: 8300000, guid: 74a65a7ffe86b8e4f953d6867a8c4409, type: 3}
-  defaultBPM: 120
+  defaultBPM: 60
 --- !u!4 &864241198
 Transform:
   m_ObjectHideFlags: 0
@@ -1331,8 +1331,9 @@ MonoBehaviour:
   playerTransform: {fileID: 1351170535}
   speed: 10
   dashForce: 5
-  dashDuration: 0.2
-  failedDashDelay: 0.5
+  dashDuration: 0.05
+  canDash: 1
+  failPenalty: 0.25
   attackScript: {fileID: 1351170536}
   orientation: {fileID: 1419763319}
   gazeFollowedAttackable: {fileID: 0}

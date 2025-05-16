@@ -20,9 +20,9 @@ public class MovementController : MonoBehaviour
     public float speed;
     public float dashForce;
     public float dashDuration;
-    public float failedDashDelay;
     private bool isDashing;
-    private bool canDash = true;
+    public bool canDash = true;
+    [SerializeField] float failPenalty;
 
 
     [Header("Turning")]
@@ -73,12 +73,8 @@ public class MovementController : MonoBehaviour
             orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
 
-        if(!LevelEventManager.OnBeat && dash.WasPerformedThisFrame())
-        {
-            //Dash delay
-        }
-
-        if(LevelEventManager.OnBeat && canDash && LevelEventManager.cooldownUntilNextAction == 0 && dash.WasPerformedThisFrame())
+        
+        if(LevelEventManager.OnBeat && canDash && dash.WasPerformedThisFrame())
         {
             StartCoroutine(Dash());
         } 
@@ -98,5 +94,12 @@ public class MovementController : MonoBehaviour
 
         yield return new WaitForSeconds(dashDuration);
         isDashing = false;
+    }
+
+    IEnumerator Incorrect()
+    {
+        canDash = false;
+        yield return new WaitForSeconds(LevelEventManager.timeBetweenBeats*failPenalty);
+        canDash = true;
     }
 }
