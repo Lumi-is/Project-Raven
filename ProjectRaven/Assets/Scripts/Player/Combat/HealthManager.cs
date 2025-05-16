@@ -1,0 +1,32 @@
+using UnityEngine;
+
+public class HealthManager : MonoBehaviour
+{
+    public float HP;
+    public float MaxHP;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        HP = MaxHP;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(HP < 0)
+        {
+            Die();
+        }
+    }
+
+    public void TakeDamage(float takenDamageAmount)
+    {
+        HP -= takenDamageAmount;
+    }
+
+    void Die()
+    {
+        //Play die animation
+    }
+}
