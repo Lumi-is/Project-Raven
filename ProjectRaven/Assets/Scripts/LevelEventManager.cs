@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO.DataHandling;
 using System.IO;
 using System;
+using UnityEngine.Video;
 
 
 public class LevelEventManager : MonoBehaviour
@@ -148,10 +149,11 @@ public class LevelEventManager : MonoBehaviour
 
     [Header("Music Attributes")]
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
-    public float timerOffsetLimit;
+    [Range(0.4f,1)]
+    public float maxTimingOffset = 0.75f;
 
     private float lastBeat;
-    private float timeBetweenBeats;
+    public static float timeBetweenBeats;
     private float currentFrameTime;
 
     //_________________________________________________________________________________
@@ -330,10 +332,10 @@ public class LevelEventManager : MonoBehaviour
         // Every frame
         void Update()
         {
-            if(!LevelActive) return;
+            //Debug.Log(OnBeat);
+            if(!LevelActive) return;    
 
-            // Sets the currentFrameMusicTime to be the music time from current clip
-            currentFrameTime = musicPlayer.time;
+            CheckBeat();
             
             if(currentBossData != null && (activeLevelType == "BOSS" || activeLevelType == "ALL")) DoBossActions();
             
@@ -343,6 +345,34 @@ public class LevelEventManager : MonoBehaviour
 
 
 
+        private void CheckBeat()
+        {
+            currentFrameTime = musicPlayer.time;
+            Debug.Log("CurrentFrameTime: "+currentFrameTime);
+
+            float currentBeatTime = (currentBeat+1) * timeBetweenBeats;
+            Debug.Log("CurrentBeat * timeBetweenbeats: "+currentBeatTime);
+            
+            float trueOffset = maxTimingOffset * timeBetweenBeats;
+            Debug.Log("Offset: "+trueOffset);
+
+
+            if((currentFrameTime < (currentBeatTime + trueOffset)) && (currentFrameTime > (currentBeatTime - trueOffset)))
+            {
+                Debug.Log("set to TRUE");
+                if(OnBeat) return;
+                
+                OnBeat = true;
+
+                if(cooldownUntilNextAction == 0) return;
+                cooldownUntilNextAction--;
+                
+            } else {
+                Debug.Log("set to FALSE");
+                OnBeat = false;
+            }
+        }
+
         //_________________________________________________________________________________
         private void DoBossActions()
         {
@@ -351,29 +381,14 @@ public class LevelEventManager : MonoBehaviour
             if(currentFrameTime > lastBeat + timeBetweenBeats && currentBeat < currentPhaseData.beatMatrix.Count)
             {
                 lastBeat += timeBetweenBeats;
-                if(cooldownUntilNextAction != 0)
-                {
-                    cooldownUntilNextAction--;
-                }
                 
-                Debug.Log("test");
                 OnBeatChange();
-
-                StartCoroutine(OnBeatCheck());
-            } 
-
+            }
             // Checks if enough time has gone from last beat for the beat change to occur
             // This is for executing the correct actions if the music is at its last beat and should be looped
-            else if(currentBeat == currentPhaseData.beatMatrix.Count)
-            {
-                if(cooldownUntilNextAction != 0)
-                {
-                    cooldownUntilNextAction--;
-                }
-                
+            else if(currentBeat >= currentPhaseData.beatMatrix.Count)
+            {              
                 ResetBeat();
-                
-                StartCoroutine(OnBeatCheck());
             }
         }
         //_________________________________________________________________________________
@@ -388,28 +403,19 @@ public class LevelEventManager : MonoBehaviour
             if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat < currentRoomData.beatMatrix.Count)
             {
                 lastBeat += timeBetweenBeats;
+
+                OnBeatChange();
                 if(cooldownUntilNextAction != 0)
                 {
                     cooldownUntilNextAction--;
                 }
-
-                OnBeatChange();
-
-                StartCoroutine(OnBeatCheck());
             } 
 
             // Checks if enough time has gone from last beat for the beat change to occur
             // This is for executing the correct actions if the music is at its last beat and should be looped
-            else if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat == currentRoomData.beatMatrix.Count)
-            {
-                if(cooldownUntilNextAction != 0)
-                {
-                    cooldownUntilNextAction--;
-                }
-                
+            else if(currentBeat >= currentRoomData.beatMatrix.Count)
+            {                
                 ResetBeat();
-                
-                StartCoroutine(OnBeatCheck());
             }
         }
         //_________________________________________________________________________________    
@@ -536,19 +542,6 @@ public class LevelEventManager : MonoBehaviour
 
     #region Beat Management
     //_________________________________________________________________________________
-    private IEnumerator OnBeatCheck()
-    {
-        yield return new WaitForSeconds(timerOffsetLimit/2);
-        OnBeat = false;
-
-        yield return new WaitForSeconds(timeBetweenBeats-timerOffsetLimit);
-        OnBeat = true;
-    }
-    //_________________________________________________________________________________
-
-
-
-    //_________________________________________________________________________________
     public void OnBeatChange()
     {
         if(bossOverridesAreaLevel) {
@@ -565,7 +558,6 @@ public class LevelEventManager : MonoBehaviour
                 currentAreaSpawnableList = currentRoomData.beatMatrix[currentBeat];
             }
         }
-        StartCoroutine(OnBeatCheck());
         SpawnEnemies();
         currentBeat++;
     }
