@@ -133,6 +133,10 @@ public class LevelEventManager : MonoBehaviour
 
     [Header("Current items")]
     public int currentBeat;
+
+    [Header("Global")]
+    [Range(-1,1)]
+    public float globalOffsetMultiplier;
     //_________________________________________________________________________________
     #endregion
 
@@ -143,27 +147,25 @@ public class LevelEventManager : MonoBehaviour
 
     [Header("Sound")]
     [SerializeField] AudioSource musicPlayer;
-    [SerializeField] bool guessMusicOffset = true;
-    [Range(0,10)]
-    [SerializeField] double musicOffset;
 
     [Header("Music Attributes")]
     [Tooltip("Offset for how much time the player is given on each beat for still hitting them correctly.")]
-    [Range(0.4f,1)]
+    [Range(0.1f,1)]
     public float maxTimingOffset = 0.75f;
 
     private float lastBeat;
     public static float timeBetweenBeats;
     private float currentFrameTime;
+    private bool cooldownDecremented = false;
 
     //_________________________________________________________________________________
     #endregion
-    
+
 
 
     #region Player Action Management Variables
     //_________________________________________________________________________________
-    
+
     public static int cooldownUntilNextAction;
 
     //_________________________________________________________________________________
@@ -341,35 +343,45 @@ public class LevelEventManager : MonoBehaviour
             
             if(currentAreaData != null && (activeLevelType == "AREA" || activeLevelType == "ALL")) DoAreaActions();
         }
-        //_________________________________________________________________________________
+    //_________________________________________________________________________________
 
-
+    [SerializeField] GameObject debugVisualsRemoveAfterTesting;
 
         private void CheckBeat()
         {
             currentFrameTime = musicPlayer.time;
             Debug.Log("CurrentFrameTime: "+currentFrameTime);
 
-            float currentBeatTime = (currentBeat+1) * timeBetweenBeats;
-            Debug.Log("CurrentBeat * timeBetweenbeats: "+currentBeatTime);
-            
             float trueOffset = maxTimingOffset * timeBetweenBeats;
             Debug.Log("Offset: "+trueOffset);
 
-
-            if((currentFrameTime < (currentBeatTime + trueOffset)) && (currentFrameTime > (currentBeatTime - trueOffset)))
+        float currentBeatTime;
+        //if currentframetime closer to the next beat than the last, check with currentBeat+1. Otherwise check with currentbeat+0
+        if (Math.Abs(currentFrameTime - (currentBeat + 1) * timeBetweenBeats) < Math.Abs(currentFrameTime - currentBeat * timeBetweenBeats))
+        {
+            if (cooldownUntilNextAction != 0 && !cooldownDecremented)
             {
+                cooldownUntilNextAction--;
+                cooldownDecremented = true;
+            } 
+            currentBeatTime = (currentBeat + 1) * timeBetweenBeats;
+        } else {
+            currentBeatTime = currentBeat * timeBetweenBeats;
+        }        
+            Debug.Log("CurrentBeat * timeBetweenbeats: "+currentBeatTime);
+
+
+            if((currentFrameTime < (currentBeatTime + trueOffset + globalOffsetMultiplier * trueOffset)) && (currentFrameTime > (currentBeatTime - trueOffset + globalOffsetMultiplier * trueOffset)))
+            {                        
                 Debug.Log("set to TRUE");
                 if(OnBeat) return;
                 
                 OnBeat = true;
-
-                if(cooldownUntilNextAction == 0) return;
-                cooldownUntilNextAction--;
-                
+                debugVisualsRemoveAfterTesting.SetActive(true);
             } else {
                 Debug.Log("set to FALSE");
                 OnBeat = false;
+                debugVisualsRemoveAfterTesting.SetActive(false);  
             }
         }
 
@@ -559,6 +571,7 @@ public class LevelEventManager : MonoBehaviour
             }
         }
         SpawnEnemies();
+        cooldownDecremented = false;
         currentBeat++;
     }
     //_________________________________________________________________________________
@@ -593,25 +606,7 @@ public class LevelEventManager : MonoBehaviour
         timeBetweenBeats = 60f/currentBPM;
         musicPlayer.Stop();
         musicPlayer.Play();
-        musicPlayer.time = (float)CorrectAudioStartTime();    
-    }
-    //_________________________________________________________________________________
-    #endregion
-
-
-
-    #region Music Management
-    //_________________________________________________________________________________
-    private double CorrectAudioStartTime()
-    {
-        if(guessMusicOffset)
-        {
-            double correctAudioStartTime = musicPlayer.clip.length - Math.Round(musicPlayer.clip.length);
-            return correctAudioStartTime;
-        } else {
-            return musicOffset;
-        }
-        
+        musicPlayer.time = 0;    
     }
     //_________________________________________________________________________________
     #endregion

@@ -23,6 +23,7 @@ public class MovementController : MonoBehaviour
     private bool isDashing;
     public bool canDash = true;
     [SerializeField] float failPenalty;
+    private bool penaltyExtension;
 
 
     [Header("Turning")]
@@ -73,11 +74,22 @@ public class MovementController : MonoBehaviour
             orientation.LookAt(playerTransform.position + playerTransform.forward);
         }
 
-        
-        if(LevelEventManager.OnBeat && canDash && dash.WasPerformedThisFrame())
+
+        if (LevelEventManager.OnBeat && LevelEventManager.cooldownUntilNextAction == 0 && canDash && dash.WasPerformedThisFrame())
         {
             StartCoroutine(Dash());
-        } 
+        }
+        else if (dash.WasPerformedThisFrame())
+        {
+            if (canDash)
+            {
+                StartCoroutine(Incorrect());
+            }
+            else
+            {
+                penaltyExtension = true;
+            }            
+        }
 
         var step = rotationSpeed * Time.deltaTime;
         transform.rotation = Quaternion.RotateTowards(transform.rotation,orientation.rotation, step);
@@ -100,6 +112,14 @@ public class MovementController : MonoBehaviour
     {
         canDash = false;
         yield return new WaitForSeconds(LevelEventManager.timeBetweenBeats*failPenalty);
-        canDash = true;
+        if (penaltyExtension)
+        {
+            penaltyExtension = false;
+            StartCoroutine(Incorrect());
+        }
+        else
+        {
+            canDash = true;
+        }
     }
 }
