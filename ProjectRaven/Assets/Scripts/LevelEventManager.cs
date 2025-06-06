@@ -329,59 +329,60 @@ public class LevelEventManager : MonoBehaviour
     }
     //_________________________________________________________________________________
 
-        #region On Frame Update
-        //_________________________________________________________________________________
-        // Every frame
-        void Update()
-        {
-            //Debug.Log(OnBeat);
-            if(!LevelActive) return;    
+    #region On Frame Update
+    //_________________________________________________________________________________
+    // Every frame
+    void Update()
+    {
+        //Debug.Log(OnBeat);
+        if (!LevelActive) return;
 
-            CheckBeat();
-            
-            if(currentBossData != null && (activeLevelType == "BOSS" || activeLevelType == "ALL")) DoBossActions();
-            
-            if(currentAreaData != null && (activeLevelType == "AREA" || activeLevelType == "ALL")) DoAreaActions();
-        }
+        currentFrameTime = musicPlayer.time;
+
+        CheckBeat();
+
+        if (currentBossData != null && (activeLevelType == "BOSS" || activeLevelType == "ALL")) DoBossActions();
+
+        if (currentAreaData != null && (activeLevelType == "AREA" || activeLevelType == "ALL")) DoAreaActions();
+
+        Debug.Log("CurrentFrameTime: " + currentFrameTime);
+        Debug.Log("lastBeat: " + lastBeat);
+        Debug.Log("TimeBetweenBeats: " + timeBetweenBeats);
+
+    }
     //_________________________________________________________________________________
 
     [SerializeField] GameObject debugVisualsRemoveAfterTesting;
 
         private void CheckBeat()
         {
-            currentFrameTime = musicPlayer.time;
-            Debug.Log("CurrentFrameTime: "+currentFrameTime);
-
             float trueOffset = maxTimingOffset * timeBetweenBeats;
-            Debug.Log("Offset: "+trueOffset);
 
-        float currentBeatTime;
-        //if currentframetime closer to the next beat than the last, check with currentBeat+1. Otherwise check with currentbeat+0
-        if (Math.Abs(currentFrameTime - (currentBeat + 1) * timeBetweenBeats) < Math.Abs(currentFrameTime - currentBeat * timeBetweenBeats))
-        {
-            if (cooldownUntilNextAction != 0 && !cooldownDecremented)
+            float currentBeatTime;
+            //if currentframetime closer to the next beat than the last, check with currentBeat+1. Otherwise check with currentbeat+0
+            if (Math.Abs(currentFrameTime - (currentBeat + 1) * timeBetweenBeats) < Math.Abs(currentFrameTime - currentBeat * timeBetweenBeats))
             {
-                cooldownUntilNextAction--;
-                cooldownDecremented = true;
-            } 
-            currentBeatTime = (currentBeat + 1) * timeBetweenBeats;
-        } else {
-            currentBeatTime = currentBeat * timeBetweenBeats;
-        }        
-            Debug.Log("CurrentBeat * timeBetweenbeats: "+currentBeatTime);
+                if (cooldownUntilNextAction != 0 && !cooldownDecremented)
+                {
+                    cooldownUntilNextAction--;
+                    cooldownDecremented = true;
+                } 
+                currentBeatTime = (currentBeat + 1) * timeBetweenBeats;
+            } else {
+                currentBeatTime = currentBeat * timeBetweenBeats;
+            }
 
+            if ((currentFrameTime < (currentBeatTime + trueOffset + globalOffsetMultiplier * trueOffset)) && (currentFrameTime > (currentBeatTime - trueOffset + globalOffsetMultiplier * trueOffset)))
+            {
+                if (OnBeat) return;
 
-            if((currentFrameTime < (currentBeatTime + trueOffset + globalOffsetMultiplier * trueOffset)) && (currentFrameTime > (currentBeatTime - trueOffset + globalOffsetMultiplier * trueOffset)))
-            {                        
-                Debug.Log("set to TRUE");
-                if(OnBeat) return;
-                
                 OnBeat = true;
                 debugVisualsRemoveAfterTesting.SetActive(true);
-            } else {
-                Debug.Log("set to FALSE");
+            }
+            else
+            {
                 OnBeat = false;
-                debugVisualsRemoveAfterTesting.SetActive(false);  
+                debugVisualsRemoveAfterTesting.SetActive(false);
             }
         }
 
@@ -390,15 +391,12 @@ public class LevelEventManager : MonoBehaviour
         {
             // Checks if enough time has gone from last beat for the beat change to occur
             // Additionally, makes sure the music is not at it's end
-            if(currentFrameTime > lastBeat + timeBetweenBeats && currentBeat < currentPhaseData.beatMatrix.Count)
-            {
-                lastBeat += timeBetweenBeats;
-                
+            if(currentFrameTime >= lastBeat + timeBetweenBeats)
+            {                
                 OnBeatChange();
             }
-            // Checks if enough time has gone from last beat for the beat change to occur
             // This is for executing the correct actions if the music is at its last beat and should be looped
-            else if(currentBeat >= currentPhaseData.beatMatrix.Count)
+            else if(currentFrameTime < lastBeat)
             {              
                 ResetBeat();
             }
@@ -414,13 +412,7 @@ public class LevelEventManager : MonoBehaviour
             // Additionally, makes sure the music is not at it's end
             if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat < currentRoomData.beatMatrix.Count)
             {
-                lastBeat += timeBetweenBeats;
-
                 OnBeatChange();
-                if(cooldownUntilNextAction != 0)
-                {
-                    cooldownUntilNextAction--;
-                }
             } 
 
             // Checks if enough time has gone from last beat for the beat change to occur
@@ -556,16 +548,21 @@ public class LevelEventManager : MonoBehaviour
     //_________________________________________________________________________________
     public void OnBeatChange()
     {
-        if(bossOverridesAreaLevel) {
-            currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];  
-            currentAreaSpawnableList = new(); 
-        } else {
-            if(currentPhaseDataList != null)
+        lastBeat += timeBetweenBeats;
+
+        if (bossOverridesAreaLevel)
+        {
+            currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];
+            currentAreaSpawnableList = new();
+        }
+        else
+        {
+            if (currentPhaseDataList != null)
             {
                 currentBossSpawnableList = currentPhaseData.beatMatrix[currentBeat];
             }
-    
-            if(currentAreaData != null)
+
+            if (currentAreaData != null)
             {
                 currentAreaSpawnableList = currentRoomData.beatMatrix[currentBeat];
             }

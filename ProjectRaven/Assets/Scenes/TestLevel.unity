@@ -1308,7 +1308,7 @@ MonoBehaviour:
   currentBeat: 0
   globalOffsetMultiplier: 0
   musicPlayer: {fileID: 0}
-  maxTimingOffset: 0.2
+  maxTimingOffset: 0.25
   DebugLevelCreation: 1
   debugVisualsRemoveAfterTesting: {fileID: 652261586}
 --- !u!114 &864241197
@@ -1326,19 +1326,16 @@ MonoBehaviour:
   bossName: testBoss
   phaseNameList:
   - Phase1
-  - Phase2
-  phaseVersionAmountList: 0100000001000000
+  phaseVersionAmountList: 01000000
   areaLevelName: testAreaLevel
   areaNameList:
   - area1
-  - area2
   roomNameList:
   - Room1
-  - Room2
+  - Room1
   phaseSongList:
-  - {fileID: 8300000, guid: 74a65a7ffe86b8e4f953d6867a8c4409, type: 3}
-  - {fileID: 8300000, guid: 74a65a7ffe86b8e4f953d6867a8c4409, type: 3}
-  defaultBPM: 120
+  - {fileID: 8300000, guid: dfa7c2eb42517aa4488556c4b7f59bd4, type: 3}
+  defaultBPM: 140
 --- !u!4 &864241198
 Transform:
   m_ObjectHideFlags: 0
@@ -1548,10 +1545,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 1351170535}
   speed: 10
-  dashForce: 10
+  dashForce: 6
   dashDuration: 0.1
   canDash: 1
-  failPenalty: 0.25
+  failPenalty: 1
   attackScript: {fileID: 1351170536}
   orientation: {fileID: 1419763319}
   gazeFollowedAttackable: {fileID: 0}
