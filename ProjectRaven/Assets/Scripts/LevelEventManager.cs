@@ -4,15 +4,12 @@ using UnityEngine;
 using System.IO.DataHandling;
 using System.IO;
 using System;
-using UnityEngine.Video;
-
+using NUnit.Framework.Internal;
 
 public class LevelEventManager : MonoBehaviour
 {   
 
     // Variables //
-
-
 
     #region Level Management Variables
     //_________________________________________________________________________________
@@ -92,12 +89,12 @@ public class LevelEventManager : MonoBehaviour
 
     public static List<BeatData> currentAreaSpawnableList;
 
+    [SerializeField] float roomSpacingAmount = 60;
+
 
     //For room spawning 
 
     [Header("Room Type List")]
-    
-    public List<string> roomTypeList;
     private readonly Dictionary<string,GameObject> roomDictionary = new();
     //_________________________________________________________________________________
     #endregion
@@ -108,9 +105,6 @@ public class LevelEventManager : MonoBehaviour
     //_________________________________________________________________________________
 
     [Header("Bullet Type List")]
-    
-    // List of all names of different attack types. If attack type is not in this list, it cannot be used from BeatData files.
-    public List<string> bulletTypeList;
 
     // Dictionary for connecting the name of the attack as stated above, to the prefab saved in the resources/prefabs folder
     private readonly Dictionary<string,GameObject> bulletDictionary = new();
@@ -179,8 +173,6 @@ public class LevelEventManager : MonoBehaviour
 
     // Class & Methods // 
 
-
-
     #region Initialization
     //_________________________________________________________________________________
     void Start()
@@ -200,14 +192,14 @@ public class LevelEventManager : MonoBehaviour
         }
 
         // For initializing bulletDictionary
-        foreach(string str in bulletTypeList)
+        foreach (GameObject gameObject in Resources.LoadAll(Path.Combine("Prefabs", "Bullets"), typeof(GameObject)))
         {
-            bulletDictionary.Add(str,Resources.Load<GameObject>(Path.Combine("Prefabs","Bullets",str)));
+            bulletDictionary.Add(gameObject.name, gameObject);
         }
 
-        foreach(string str in roomTypeList)
+        foreach(GameObject gameObject in Resources.LoadAll(Path.Combine("Prefabs","Rooms"),typeof(GameObject)))
         {
-            roomDictionary.Add(str,Resources.Load<GameObject>(Path.Combine("Prefabs","Rooms",str)));
+            roomDictionary.Add(gameObject.name,gameObject);
         }
 
         // Adding audiosource to editor with the object
@@ -254,7 +246,7 @@ public class LevelEventManager : MonoBehaviour
         {
             if(room.roomType != "none")
             {
-                GameObject newRoom = Instantiate(roomDictionary[room.roomType],new Vector3(room.roomPos[0],room.roomPos[1],room.roomPos[2]), new Quaternion(0,room.roomRotation,0,0));
+                GameObject newRoom = Instantiate(roomDictionary[room.roomType],new Vector3(room.roomPos[0],room.roomPos[1],room.roomPos[2])*roomSpacingAmount, new Quaternion(0,room.roomRotation,0,0));
                 newRoom.name = room.roomName;
             }
         }
@@ -328,6 +320,7 @@ public class LevelEventManager : MonoBehaviour
         activeLevelType = "NONE";
     }
     //_________________________________________________________________________________
+    #endregion
 
     #region On Frame Update
     //_________________________________________________________________________________
@@ -339,11 +332,9 @@ public class LevelEventManager : MonoBehaviour
 
         currentFrameTime = musicPlayer.time;
 
-        CheckBeat();
+        DoTimingChecks();
 
-        if (currentBossData != null && (activeLevelType == "BOSS" || activeLevelType == "ALL")) DoBossActions();
-
-        if (currentAreaData != null && (activeLevelType == "AREA" || activeLevelType == "ALL")) DoAreaActions();
+        if (currentBossData != null && currentAreaData != null && (activeLevelType == "BOSS" || activeLevelType == "AREA" || activeLevelType == "ALL")) DoBeatChecks();
 
         Debug.Log("CurrentFrameTime: " + currentFrameTime);
         Debug.Log("lastBeat: " + lastBeat);
@@ -354,7 +345,7 @@ public class LevelEventManager : MonoBehaviour
 
     [SerializeField] GameObject debugVisualsRemoveAfterTesting;
 
-        private void CheckBeat()
+        private void DoTimingChecks()
         {
             float trueOffset = maxTimingOffset * timeBetweenBeats;
 
@@ -387,13 +378,13 @@ public class LevelEventManager : MonoBehaviour
         }
 
         //_________________________________________________________________________________
-        private void DoBossActions()
+        private void DoBeatChecks()
         {
             // Checks if enough time has gone from last beat for the beat change to occur
             // Additionally, makes sure the music is not at it's end
             if(currentFrameTime >= lastBeat + timeBetweenBeats)
             {                
-                OnBeatChange();
+                IncrementBeat();
             }
             // This is for executing the correct actions if the music is at its last beat and should be looped
             else if(currentFrameTime < lastBeat)
@@ -402,28 +393,7 @@ public class LevelEventManager : MonoBehaviour
             }
         }
         //_________________________________________________________________________________
-
-
-
-        //_________________________________________________________________________________
-        private void DoAreaActions()
-        {
-            // Checks if enough time has gone from last beat for the beat change to occur
-            // Additionally, makes sure the music is not at it's end
-            if(currentFrameTime >= lastBeat + timeBetweenBeats && currentBeat < currentRoomData.beatMatrix.Count)
-            {
-                OnBeatChange();
-            } 
-
-            // Checks if enough time has gone from last beat for the beat change to occur
-            // This is for executing the correct actions if the music is at its last beat and should be looped
-            else if(currentBeat >= currentRoomData.beatMatrix.Count)
-            {                
-                ResetBeat();
-            }
-        }
-        //_________________________________________________________________________________    
-        #endregion
+        
 
     
 
@@ -546,7 +516,7 @@ public class LevelEventManager : MonoBehaviour
 
     #region Beat Management
     //_________________________________________________________________________________
-    public void OnBeatChange()
+    public void IncrementBeat()
     {
         lastBeat += timeBetweenBeats;
 
