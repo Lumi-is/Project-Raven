@@ -1118,7 +1118,7 @@ VisualEffect:
   m_PropertySheet:
     m_Float:
       m_Array:
-      - m_Value: 60
+      - m_Value: 120
         m_Name: BPM
         m_Overridden: 1
     m_Vector2f:
@@ -1193,7 +1193,8 @@ MonoBehaviour:
   currentBossHP: 100
   maxBossHP: 100
   currentAreaLevelName: testAreaLevel
-  roomSpacingAmount: 60
+  roomSpacingMultiplier: 60
+  BulletSpacingMultiplier: 30
   currentBeat: 0
   globalOffsetMultiplier: 0
   musicPlayer: {fileID: 0}

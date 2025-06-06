@@ -27,6 +27,6 @@ public class HealthManager : MonoBehaviour
 
     void Die()
     {
-        //Play die animation
+        //Die
     }
 }

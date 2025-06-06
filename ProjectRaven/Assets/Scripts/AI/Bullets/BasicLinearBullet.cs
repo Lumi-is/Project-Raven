@@ -2,27 +2,20 @@ using UnityEngine;
 
 public class BasicLinearBullet : MonoBehaviour
 {
-    public LinearBulletStats bulletStatistics;
 
     public bool shootAtPlayer;
-
-    GameObject bulletObject;
 
     [SerializeField] GameObject model;
 
     [SerializeField] float speed;
 
+    [SerializeField] float damage;
+
     [SerializeField] Vector3 targetPos;
-
-
-    public bool isInEditor;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
-    {
-        if(isInEditor) return;
-        
-
+    {     
         Rigidbody rb = GetComponent<Rigidbody>();
 
         //Custom shader and color
@@ -41,23 +34,14 @@ public class BasicLinearBullet : MonoBehaviour
             bulletShootDirection = speed * bulletShootDirection;
             rb.linearVelocity = new Vector3(bulletShootDirection.x, transform.position.y, bulletShootDirection.z);
         }
-
-        Invoke(nameof(KillBullet),bulletStatistics.lifeTime);
-    }
-
-    
+    }    
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.GetComponent<HealthManager>() != null)
+        if (other.gameObject.tag == "Player")
         {
             HealthManager playerScript = other.gameObject.GetComponent<HealthManager>();
-            playerScript.TakeDamage(bulletStatistics.dmg);
+            playerScript.TakeDamage(damage);
         }
-    }
-
-    void KillBullet()
-    {
-        Destroy(bulletObject);
     }
 }

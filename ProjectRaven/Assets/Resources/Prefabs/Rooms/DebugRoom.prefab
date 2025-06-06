@@ -232,7 +232,7 @@ GameObject:
   - component: {fileID: 2504849613069153904}
   m_Layer: 0
   m_Name: DebugRoom
-  m_TagString: Untagged
+  m_TagString: Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

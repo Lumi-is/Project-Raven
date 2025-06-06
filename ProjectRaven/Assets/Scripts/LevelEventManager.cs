@@ -89,7 +89,7 @@ public class LevelEventManager : MonoBehaviour
 
     public static List<BeatData> currentAreaSpawnableList;
 
-    [SerializeField] float roomSpacingAmount = 60;
+    [SerializeField] float roomSpacingMultiplier = 60;
 
 
     //For room spawning 
@@ -104,6 +104,7 @@ public class LevelEventManager : MonoBehaviour
     #region Bullet Management Variables
     //_________________________________________________________________________________
 
+    [SerializeField] float BulletSpacingMultiplier = 30;
     [Header("Bullet Type List")]
 
     // Dictionary for connecting the name of the attack as stated above, to the prefab saved in the resources/prefabs folder
@@ -246,7 +247,7 @@ public class LevelEventManager : MonoBehaviour
         {
             if(room.roomType != "none")
             {
-                GameObject newRoom = Instantiate(roomDictionary[room.roomType],new Vector3(room.roomPos[0],room.roomPos[1],room.roomPos[2])*roomSpacingAmount, new Quaternion(0,room.roomRotation,0,0));
+                GameObject newRoom = Instantiate(roomDictionary[room.roomType],new Vector3(room.roomPos[0],room.roomPos[1],room.roomPos[2])*roomSpacingMultiplier, new Quaternion(0,room.roomRotation,0,0));
                 newRoom.name = room.roomName;
             }
         }
@@ -490,25 +491,6 @@ public class LevelEventManager : MonoBehaviour
         }
         //_________________________________________________________________________________
         #endregion
-
-        #region Room Management
-        
-        //_________________________________________________________________________________
-        // To be referred from player to change room when entering a new one 
-        public void ChangeRoomTo(string roomName)
-        {
-            foreach (RoomData room in currentAreaData.roomList)
-            {
-                if(room.roomName == roomName)
-                {
-                    currentRoomData = room;
-                    break;
-                }
-            }
-        }
-        //_________________________________________________________________________________
-
-        #endregion
     //_________________________________________________________________________________
     #endregion
 
@@ -629,7 +611,7 @@ public class LevelEventManager : MonoBehaviour
                 beatSpawnPos = new(beat.spawnPos[0],0,beat.spawnPos[1]); 
             }
 
-            GameObject instantiatedObject = Instantiate(bulletDictionary[beat.behaviorType], beatSpawnPos, Quaternion.identity);
+            GameObject instantiatedObject = Instantiate(bulletDictionary[beat.behaviorType], beatSpawnPos*BulletSpacingMultiplier, Quaternion.identity);
 
             if(beat.lifetime != null)
             {
