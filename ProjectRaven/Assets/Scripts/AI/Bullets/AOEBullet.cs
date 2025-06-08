@@ -5,10 +5,13 @@ public class AOEBullet : MonoBehaviour
 {
     [SerializeField] int warningTimer;
     [SerializeField] float damage;
-    [SerializeField] float size;
+    [SerializeField] Collider hitbox;
+    [SerializeField] Renderer visuals;
 
     void Awake()
     {
+        hitbox.enabled = false;
+        visuals.enabled = false;
         StartCoroutine(AOEWarning());
     }
 
@@ -25,6 +28,8 @@ public class AOEBullet : MonoBehaviour
 
     void AOEAttack()
     {
+        hitbox.enabled = true;
+        visuals.enabled = true;
         //Enable all necessary parts for the attack (hitbox and visuals)
     }
 

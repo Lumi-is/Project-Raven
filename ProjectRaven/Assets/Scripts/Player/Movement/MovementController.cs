@@ -13,6 +13,9 @@ public class MovementController : MonoBehaviour
 
     [Header("Transform")]
     public Transform playerTransform;
+
+    // For bullets to read where player is in World Position
+    public static Vector3 publicPlayerLocation;
     Vector3 ProcessedDirection;
 
 
@@ -47,6 +50,7 @@ public class MovementController : MonoBehaviour
    
     void Update()
     {
+        publicPlayerLocation = playerTransform.position;
         //Rotates world Vector3 Matrix for 45 degrees in order for X and Z axis to work well with an isometric camera.
         var Matrix = Matrix4x4.Rotate(Quaternion.Euler(0,45,0));
 
