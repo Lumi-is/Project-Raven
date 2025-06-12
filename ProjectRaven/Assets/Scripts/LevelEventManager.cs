@@ -5,6 +5,9 @@ using System.IO.DataHandling;
 using System.IO;
 using System;
 using Unity.VisualScripting;
+using System.Diagnostics.Tracing;
+using System.Reflection;
+using UnityEditor.SceneManagement;
 
 public class LevelEventManager : MonoBehaviour
 {
@@ -60,8 +63,12 @@ public class LevelEventManager : MonoBehaviour
 
     // List of spawnable items per beat
     public static List<BeatData> currentBossSpawnableList;
+    public static List<Type> BossAIComponentList;
 
     // Entity Specifics //
+
+    // GameObject currently holding boss AI
+    public GameObject BossObject;
 
     // Boss's current HP amount, if one is active
     public float currentBossHP;
@@ -113,6 +120,11 @@ public class LevelEventManager : MonoBehaviour
     public static Tuple<List<GameObject>, List<BeatData>> activeBulletList = new(new(), new());
 
     //_________________________________________________________________________________
+    #endregion
+
+    #region AI
+    private readonly Dictionary<string, GameObject> bossDictionary = new();
+    private readonly Dictionary<string, Component> componentDictionary = new();
     #endregion
 
 
@@ -196,9 +208,24 @@ public class LevelEventManager : MonoBehaviour
             bulletDictionary.Add(gameObject.name, gameObject);
         }
 
+        // For initializing roomDictionary
         foreach (GameObject gameObject in Resources.LoadAll(Path.Combine("Prefabs", "Rooms"), typeof(GameObject)))
         {
             roomDictionary.Add(gameObject.name, gameObject);
+        }
+
+        // For initializing AIDictionary
+        foreach (GameObject gameObject in Resources.LoadAll(Path.Combine("Prefabs", "BossAI"), typeof(GameObject)))
+        {
+            bossDictionary.Add(gameObject.name,gameObject);
+
+            foreach (Component component in gameObject.GetComponents<Component>())
+            {
+                if (!componentDictionary.ContainsKey(component.name))
+                {
+                    componentDictionary.Add(component.name, component);
+                }
+            }
         }
 
         // Adding audiosource to editor with the object
@@ -327,7 +354,6 @@ public class LevelEventManager : MonoBehaviour
     // Every frame
     void Update()
     {
-        //Debug.Log(OnBeat);
         if (!LevelActive) return;
 
         currentFrameTime = musicPlayer.time;
@@ -335,11 +361,6 @@ public class LevelEventManager : MonoBehaviour
         DoTimingChecks();
 
         if (currentBossData != null && currentAreaData != null && (activeLevelType == "BOSS" || activeLevelType == "AREA" || activeLevelType == "ALL")) DoBeatChecks();
-
-        Debug.Log("CurrentFrameTime: " + currentFrameTime);
-        Debug.Log("lastBeat: " + lastBeat);
-        Debug.Log("TimeBetweenBeats: " + timeBetweenBeats);
-
     }
     //_________________________________________________________________________________
 
@@ -595,51 +616,54 @@ public class LevelEventManager : MonoBehaviour
 
         foreach (BeatData beat in data)
         {
-            // Spawn area bullets, enemies and threats
-            if (beat.behaviorType == null) return;
-
-            Vector3 beatSpawnPos;
-            if (beat.posAnchor == null)
-            {
-                beatSpawnPos = new(beat.spawnPos[0], 0, beat.spawnPos[1]);
-            }
-            else if (beat.posAnchor == "PLAYER")
+            if (beat.behaviorTypeList == null) return;
+            
+            Vector3 beatSpawnPos = new(beat.spawnPos[0], 0, beat.spawnPos[1]);
+            List<GameObject> instantiatedObjectList = new();
+            
+            if (beat.posAnchor == "PLAYER")
             {
                 beatSpawnPos = MovementController.publicPlayerLocation;
             }
             else if (beat.posAnchor == "ROOM")
             {
                 beatSpawnPos = new Vector3(currentRoomData.roomPos[0], currentRoomData.roomPos[1], currentRoomData.roomPos[2]) * roomSpacingMultiplier;
+            } 
+
+            if (beat.isAIInjectable)
+            {
+                
+                if (BossObject != null)
+                {
+                    beatSpawnPos = BossObject.transform.position;
+                }
+                
+                GameObject instantedObject = Instantiate(bossDictionary[beat.behaviorTypeList[0]], beatSpawnPos, Quaternion.identity);
+
+                Destroy(BossObject);
+                BossObject = instantedObject;
             }
             else
             {
-                beatSpawnPos = new(beat.spawnPos[0], 0, beat.spawnPos[1]);
-                Debug.LogWarning("Incorrect JSON file found! Check level files and try again.");
-            }
-
-
-            List<GameObject> instantiatedObjectList = new();
-
-            foreach (string str in beat.behaviorType)
-            {
-                if (beat.isRandomized)
+                foreach (string behaviorType in beat.behaviorTypeList)
                 {
-                    beatSpawnPos = SpawnPosRandomizer.GetRandomizedPosition(beatSpawnPos, beat.randomizerAmountX, beat.randomizerAmountZ);
+                    if (beat.isRandomized)
+                    {
+                        beatSpawnPos = SpawnPosRandomizer.GetRandomizedPosition(beatSpawnPos, beat.randomizerAmountX, beat.randomizerAmountZ);
+                    }
+                    GameObject instantedObject = Instantiate(bulletDictionary[behaviorType], beatSpawnPos, Quaternion.identity);
+                    instantiatedObjectList.Add(instantedObject);
                 }
-                GameObject instantedObject = Instantiate(bulletDictionary[str], beatSpawnPos, Quaternion.identity);
-                instantiatedObjectList.Add(instantedObject);
-            }
 
-
-
-            foreach (GameObject instantiatedObject in instantiatedObjectList)
-            {
-                if (beat.lifetime != 0)
+                foreach (GameObject instantiatedObject in instantiatedObjectList)
                 {
-                    StartCoroutine(Destroyer(instantiatedObject, beat.lifetime * timeBetweenBeats));
+                    if (beat.lifetime != 0)
+                    {
+                        StartCoroutine(Destroyer(instantiatedObject, beat.lifetime * timeBetweenBeats));
+                    }
+                    activeBulletList.Item1.Add(instantiatedObject);
+                    activeBulletList.Item2.Add(beat);
                 }
-                activeBulletList.Item1.Add(instantiatedObject);
-                activeBulletList.Item2.Add(beat);
             }
         }
         //_________________________________________________________________________________
