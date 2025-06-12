@@ -16,7 +16,7 @@ MonoBehaviour:
   m_Parent: {fileID: 114350483966674976}
   m_Children:
   - {fileID: 8926484042661614549}
-  m_UIPosition: {x: 1290, y: -435}
+  m_UIPosition: {x: 1290, y: -485}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -88,9 +88,9 @@ MonoBehaviour:
     position:
       serializedVersion: 2
       x: 1265
-      y: -494
+      y: -544
       width: 474
-      height: 1279
+      height: 1473
     contents:
     - model: {fileID: 114023846229194376}
       id: 0
@@ -110,7 +110,7 @@ MonoBehaviour:
       x: 2279
       y: -519
       width: 474
-      height: 1468
+      height: 1615
     contents:
     - model: {fileID: 8926484042661614828}
       id: 0
@@ -128,10 +128,10 @@ MonoBehaviour:
   categories: []
   uiBounds:
     serializedVersion: 2
-    x: 0
-    y: -543
-    width: 3855
-    height: 1838
+    x: 739
+    y: -544
+    width: 3116
+    height: 1839
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -5838,7 +5838,7 @@ MonoBehaviour:
   - {fileID: 8926484042661614883}
   - {fileID: 8926484042661614892}
   - {fileID: 8926484042661614866}
-  m_UIPosition: {x: 2304, y: 357}
+  m_UIPosition: {x: 2304, y: 503}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -5859,7 +5859,7 @@ MonoBehaviour:
   useAlphaClipping: 0
   generateMotionVector: 0
   excludeFromTUAndAA: 0
-  sortingPriority: 0
+  sortingPriority: 1
   m_SubOutputs:
   - {fileID: 8926484042661614855}
   colorMapping: 0
