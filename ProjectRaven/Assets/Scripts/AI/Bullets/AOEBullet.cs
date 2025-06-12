@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class AOEBullet : MonoBehaviour
+public class AOEBullet : MonoBehaviour, IBullet
 {
     [SerializeField] int warningTimer;
     [SerializeField] float damage;
@@ -12,18 +12,15 @@ public class AOEBullet : MonoBehaviour
     {
         hitbox.enabled = false;
         visuals.enabled = false;
-        StartCoroutine(AOEWarning());
     }
 
-    IEnumerator AOEWarning()
+    public void OnBeatChange()
     {
-        for (int i = 0; i < warningTimer; i++)
+        warningTimer--;
+        if (warningTimer == 0)
         {
-            //Flash the warning
-            yield return new WaitForSeconds(LevelEventManager.timeBetweenBeats);
+            AOEAttack();
         }
-
-        AOEAttack();
     }
 
     void AOEAttack()

@@ -4,10 +4,6 @@ using UnityEngine;
 using System.IO.DataHandling;
 using System.IO;
 using System;
-using Unity.VisualScripting;
-using System.Diagnostics.Tracing;
-using System.Reflection;
-using UnityEditor.SceneManagement;
 
 public class LevelEventManager : MonoBehaviour
 {
@@ -119,8 +115,12 @@ public class LevelEventManager : MonoBehaviour
     // These are then used when spawning the enemies
     public static Tuple<List<GameObject>, List<BeatData>> activeBulletList = new(new(), new());
 
+    private List<Type> IBulletTypes;
+
     //_________________________________________________________________________________
     #endregion
+
+
 
     #region AI
     private readonly Dictionary<string, GameObject> bossDictionary = new();
@@ -175,6 +175,8 @@ public class LevelEventManager : MonoBehaviour
 
     //_________________________________________________________________________________
     #endregion
+
+
 
     #region Debugging
     [Header("Debugging")]
@@ -241,6 +243,8 @@ public class LevelEventManager : MonoBehaviour
         {
             gameObject.GetComponent<LevelEditor>().CreateDebugLevels();
         }
+
+        IBulletTypes = ScriptMessageHandler.GetIBullets();
 
         // For setting all items
         InitializeLevel();
@@ -348,6 +352,8 @@ public class LevelEventManager : MonoBehaviour
     }
     //_________________________________________________________________________________
     #endregion
+
+
 
     #region On Frame Update
     //_________________________________________________________________________________
@@ -524,6 +530,7 @@ public class LevelEventManager : MonoBehaviour
     //_________________________________________________________________________________
     public void IncrementBeat()
     {
+        ScriptMessageHandler.CallIBullets(IBulletTypes);
         lastBeat += timeBetweenBeats;
 
         if (bossOverridesAreaLevel)

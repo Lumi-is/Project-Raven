@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BasicLinearBullet : MonoBehaviour
+public class BasicLinearBullet : MonoBehaviour, IBullet
 {
 
     public bool shootAtPlayer;
@@ -34,7 +34,12 @@ public class BasicLinearBullet : MonoBehaviour
             bulletShootDirection = speed * bulletShootDirection;
             rb.linearVelocity = new Vector3(bulletShootDirection.x, transform.position.y, bulletShootDirection.z);
         }
-    }    
+    }
+
+    public void OnBeatChange()
+    {
+        Debug.Log("V1 ULTRAKILL :D");
+    }  
 
     void OnTriggerEnter(Collider other)
     {
